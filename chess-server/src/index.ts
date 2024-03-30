@@ -9,8 +9,7 @@ const wsServer = new WebSocketServer({ server });
 const port = 8081;
 server.listen(port, () => {
   console.log(`WebSocket server is running on port ${port}`);
-  console.log("hello2");
-  console.log("hello");
+  console.log("hello23");
 });
 
 // I'm maintaining all active connections in this object

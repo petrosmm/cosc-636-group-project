@@ -1,29 +1,34 @@
-import { useEffect, useState } from "react";
-import logo from "./logo.svg";
-import "./App.css";
-import useWebSocket from "react-use-websocket";
-import { x } from "../../lib/test";
+import { ChangeEvent, useEffect, useState } from "react";
+import useStateRef from "react-usestateref";
+import "bootstrap/dist/css/bootstrap.css";
+import Board from "./comp/board";
 
 function App() {
+  const [serverIP, setServerIP, refServerIP] = useStateRef("127.0.0.1");
+  const [serverPort, setServerPort, refServerPort] = useStateRef("8081");
+  const [username, setUsername] = useState(null as unknown as string);
   const [test, setTest] = useState("");
-  const WS_URL = "ws://127.0.0.1:8081";
-  let x = "max";
+  const [canConnect, setCanConnect] = useState(false);
 
-  useWebSocket(WS_URL, {
-    onOpen: () => {
-      let zz: x = { name: "ahlan", jones: "hello" };
-      console.log(`zz`, zz);
-      console.log("WebSocket connection established.");
-    },
-    onMessage(event) {
-      console.log(event);
-    },
-  });
+  const handle = (e: ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    setServerIP(value);
+  };
+
+  const handle2 = (e: ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    setServerPort(value);
+  };
+
+  const handle3 = (e: ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    setUsername(value);
+  };
 
   useEffect(() => {
-    let person = "";
+    let person = "Max";
     if (false) {
-      person = prompt("Please enter your name", x)!;
+      person = prompt("Please enter your name", person)!;
       if (person && person?.length > 0) {
         setTest(person);
       }
@@ -32,18 +37,42 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>{test}</p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <header className="App-header"></header>
+      <div className="container-fluid">
+        {!canConnect && (
+          <div className="row">
+            <div className="col-1">
+              <button
+                className="btn btn-primary"
+                onClick={() => setCanConnect(true)}
+              >
+                Connect
+              </button>
+            </div>
+            <div className="col-1 me-5">
+              <input onChange={handle} value={serverIP} />
+            </div>
+            <div className="col-1 me-5">
+              <input onChange={handle2} value={serverPort} />
+            </div>
+            <div className="col-1 me-5">
+              <input
+                placeholder="(username)"
+                onChange={handle3}
+                value={username}
+              />
+            </div>
+          </div>
+        )}
+        {canConnect && (
+          <Board
+            username={username}
+            ip={serverIP}
+            port={serverPort}
+            setCanConnect={setCanConnect}
+          />
+        )}
+      </div>
     </div>
   );
 }
