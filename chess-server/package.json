@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "dev": "node --watch --loader=ts-node/esm src/index.ts"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.2",
+    "uuidv4": "^6.2.13",
+    "ws": "^8.16.0"
+  }
+}
