@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import useStateRef from "react-usestateref";
 import "bootstrap/dist/css/bootstrap.css";
-import Board from "./comp/board";
+import BoardContainer from "./comp/board-container";
 
 function App() {
   const [serverIP, setServerIP, refServerIP] = useStateRef("127.0.0.1");
@@ -65,7 +65,7 @@ function App() {
           </div>
         )}
         {canConnect && (
-          <Board
+          <BoardContainer
             username={username}
             ip={serverIP}
             port={serverPort}
