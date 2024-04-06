@@ -10,6 +10,6 @@ export type MessageClient = User & {
 };
 
 export type Message = User & {
-  command: "setuser" | "makemove";
+  command?: "setuser" | "makemove" | "hello";
   values?: Record<string, string>;
 };

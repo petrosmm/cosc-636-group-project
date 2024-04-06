@@ -1,12 +1,16 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import useStateRef from "react-usestateref";
-import "bootstrap/dist/css/bootstrap.css";
 import BoardContainer from "./comp/board-container";
+import { generateUsername } from "./functions";
+
+import "bootstrap/dist/css/bootstrap.css";
+
+let _username = generateUsername();
 
 function App() {
   const [serverIP, setServerIP, refServerIP] = useStateRef("127.0.0.1");
   const [serverPort, setServerPort, refServerPort] = useStateRef("8081");
-  const [username, setUsername] = useState(null as unknown as string);
+  const [username, setUsername] = useState(_username);
   const [test, setTest] = useState("");
   const [canConnect, setCanConnect] = useState(false);
 
