@@ -1,16 +1,15 @@
 import WebSocket from "ws";
 
-export type MessageUser = {
+export type User = {
   userId: string;
   username?: string;
-  value: string;
 };
 
-export type MessageClient = {
-  command?: "adduser" | "makemove";
-  userId: string;
-  username?: string;
+export type MessageClient = User & {
   socket: WebSocket;
 };
 
-export {};
+export type Message = User & {
+  command: "setuser" | "makemove";
+  values?: Record<string, string>;
+};
