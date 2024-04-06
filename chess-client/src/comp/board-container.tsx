@@ -14,6 +14,7 @@ const BoardContainer: React.FC<{
 }> = ({ ip, port, username, setCanConnect }) => {
   const [colorMine, setColorMine] = useState("");
   const [user, setUser, refUser] = useStateRef(null as unknown as User);
+
   if (username === undefined || username === null || username?.length < 3) {
     alert("Username must be atleast 3 characters!");
     setCanConnect(false);
@@ -32,29 +33,30 @@ const BoardContainer: React.FC<{
       console.log(`incoming message`, message);
 
       // if we don't have a current user in this view?
-      if (user == null) {
+      if (refUser.current == null) {
         try {
-          console.log(`incoming command`, message?.command);
           console.log(`result`, message);
           setUser(message);
         } catch (ex) {
           console.log(`ex`, ex);
         }
 
-        // if we have a username and
-        if (username != null && refUser.current?.username == null) {
+        // if the (most recent) server response does not have a username
+      } else if (refUser.current?.username == null) {
+        // if username is not null
+        if (username != null) {
+          console.log("setting usernames");
           try {
             let _userCommand = deepCopy(refUser.current) as Message;
 
             _userCommand.username = username;
             _userCommand.command = "setuser";
             sendMessage(JSON.stringify(_userCommand));
-
-            _userCommand.command = "hello";
           } catch (ex) {
             console.log("error", ex);
           }
         }
+      } else {
       }
     },
     onClose(event) {
@@ -68,7 +70,8 @@ const BoardContainer: React.FC<{
   };
 
   const WS_URL = () => `ws://${ip}:${port}?username=${username}`;
-  const { readyState, sendMessage } = useWebSocket(WS_URL(), options);
+  let webSocket = useWebSocket(WS_URL(), options);
+  const { readyState, sendMessage } = webSocket;
 
   const connectionStatus = {
     [ReadyState.CONNECTING]: "Connecting",
@@ -82,18 +85,24 @@ const BoardContainer: React.FC<{
     <>
       <div className="row">
         <div className="col-1">
+          <span>Command: {(user as any)?.command}</span>
+        </div>
+        <div className="col-1">
           <span>Status: {connectionStatus}</span>
         </div>
         <div className="col-1">
           <button
             className="btn btn-primary"
             onClick={() => {
-              console.log(`user from test`, user);
+              console.log(`user from test before sending`, refUser.current);
               return sendMessage(JSON.stringify(user));
             }}
           >
             test
           </button>
+        </div>
+        <div className="col-1">
+          <span>..................................</span>
         </div>
         {user && (
           <div className="col-2">

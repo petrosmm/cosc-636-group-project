@@ -1,19 +1,23 @@
 import { WebSocketServer } from "ws";
 import http from "http";
 import { v4 } from "uuid";
-import { Message, MessageClient, User } from "@lib/lib";
+import { Game, Message, MessageClient, User } from "@lib/lib";
+import Enumerable from "linq";
+import { addUsernameIfMissing, purgeEmptyClients } from "./functions.js";
 
 // Spinning the HTTP server and the WebSocket server.
 const server = http.createServer();
 const wssServer = new WebSocketServer({ server });
 const port = 8081;
+
 server.listen(port, () => {
   console.log(`WebSocket server is running on port ${port}`);
-  console.log("hello23");
 });
 
 // I'm maintaining all active connections in this object
 let clients: MessageClient[] = [];
+
+let games: Game[] = [];
 
 // A new client connection request received
 wssServer.on("connection", function (connection) {
@@ -40,14 +44,59 @@ wssServer.on("connection", function (connection) {
 
       switch (messageIncoming?.command) {
         case "setuser":
-          console.log(`clients`, clients);
           addUsernameIfMissing(messageIncoming, clients);
 
           break;
 
+        case "propose":
+          if (messageIncoming.from != null && messageIncoming.to) {
+            let _clientsAsPlayers = Enumerable.from(clients)
+              .where((p) =>
+                [messageIncoming.from, messageIncoming.to]
+                  .filter(Boolean)
+                  .includes(p.username)
+              )
+              .toArray();
+
+            if (_clientsAsPlayers?.length == 2) {
+            } else {
+            }
+          }
+          break;
+
+        case "getavailableplayers":
+          let _clientsAsAvailablePlayers = Enumerable.from(clients)
+            .select((p) => {
+              p.socket = null!;
+              return p;
+            })
+            .toArray();
+
+          this.send(JSON.stringify(_clientsAsAvailablePlayers));
+          break;
+
         default:
           console.log("No valid command!");
-          console.log(`clients`, clients);
+          let _clients = Enumerable.from(clients)
+            .select((p) => {
+              p.socket = null!;
+              return p;
+            })
+            .toArray();
+
+          console.log(`\r\n` + `clients`, _clients);
+
+          let client = Enumerable.from(_clients).firstOrDefault(
+            (p) =>
+              p.userId == messageIncoming.userId ||
+              p.username == messageIncoming?.username
+          );
+
+          if (client != null) {
+            console.log("found client!");
+            this.send(JSON.stringify(client));
+          }
+
           break;
       }
 
@@ -55,53 +104,3 @@ wssServer.on("connection", function (connection) {
     }
   });
 });
-
-function addUsernameIfMissing(message: Message, clients: MessageClient[]) {
-  try {
-    if (false) console.log(`user`, message.userId, message.username);
-    console.log(`message from client`, message);
-
-    if (message?.username != null) {
-      let client = clients.find(
-        (p) => p?.userId == message?.userId && p?.username == null
-      );
-      if (false) console.log("client", client);
-
-      if (client != null) {
-        let _client = client;
-        _client.username = message.username;
-
-        let indexUser = clients.findIndex((p) => p.userId == message.userId);
-        delete clients[indexUser];
-        clients.push(_client);
-
-        if (false) clients = purgeEmptyClients(clients);
-      } else if (client == null) {
-        client = clients.find(
-          (p) => p.userId != message?.userId && p.username == message.username
-        );
-
-        if (client != null) {
-          let _client = client;
-          _client.userId = message.userId;
-
-          let indexUser = clients.findIndex(
-            (p) => p.username == message.username
-          );
-
-          delete clients[indexUser];
-          clients.push(_client);
-
-          if (false) clients = purgeEmptyClients(clients);
-        }
-      }
-    }
-  } catch (ex) {
-    console.log(ex);
-  }
-}
-
-function purgeEmptyClients(input: MessageClient[]) {
-  input = input?.filter(Boolean);
-  return input;
-}

@@ -10,6 +10,14 @@ export type MessageClient = User & {
 };
 
 export type Message = User & {
-  command?: "setuser" | "makemove" | "hello";
+  command?: "setuser" | "makemove" | "propose" | "getavailableplayers";
+  to?: string;
+  from?: string;
   values?: Record<string, string>;
 };
+
+export class Game {
+  players: string[] = [];
+
+  public Game() {}
+}
