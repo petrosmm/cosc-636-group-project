@@ -1,10 +1,8 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import useWebSocket, { Options, ReadyState } from "react-use-websocket";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Message, User } from "@lib/lib";
 import useStateRef from "react-usestateref";
-import { deepCopy } from "src/functions";
-
-function checkUser() {}
+import { Socket, io } from "socket.io-client";
+import Picker from "./picker";
 
 const BoardContainer: React.FC<{
   ip: string;
@@ -12,93 +10,91 @@ const BoardContainer: React.FC<{
   username: string;
   setCanConnect: Dispatch<SetStateAction<boolean>>;
 }> = ({ ip, port, username, setCanConnect }) => {
-  const [colorMine, setColorMine] = useState("");
-  const [user, setUser, refUser] = useStateRef(null as unknown as User);
-
   if (username === undefined || username === null || username?.length < 3) {
     alert("Username must be atleast 3 characters!");
     setCanConnect(false);
   }
 
-  const options: Options = {
-    //Will attempt to reconnect on all close events, such as server shutting down
-    shouldReconnect: (closeEvent) => true,
-    onOpen: () => {
-      console.log("WebSocket connection established.");
-      setCanConnect(true);
-    },
-    onMessage(event) {
-      if (false) console.log(`event`, event);
-      let message = JSON.parse(event.data) as Message;
-      console.log(`incoming message`, message);
+  const WS_URL = () => `ws://${ip}:${port}`;
+  const [user, setUser, refUser] = useStateRef(null as unknown as User);
+  const [isConnected, setIsConnected] = useStateRef(false);
+  const [socket, setSocket, refSocket] = useStateRef(
+    null as unknown as Socket<any, any>
+  );
+  const [players, setPlayers] = useState([] as string[]);
 
-      // if we don't have a current user in this view?
-      if (refUser.current == null) {
-        try {
-          console.log(`result`, message);
-          setUser(message);
-        } catch (ex) {
-          console.log(`ex`, ex);
+  useEffect(() => {
+    let doIgnore = false;
+
+    makeSocket();
+
+    return () => {
+      doIgnore = true;
+    };
+  }, []);
+
+  function makeSocket() {
+    let _socket = io(WS_URL(), {
+      query: { username: username },
+      autoConnect: false,
+      closeOnBeforeunload: true,
+    })
+      .on("connect", () => {
+        console.log("connected!");
+        setIsConnected(true);
+      })
+      .on("disconnect", (event) => {
+        console.log("disconnected!");
+        // const _ = !_socket.disconnected ? _socket.disconnect() : null;
+        setIsConnected(false);
+        setCanConnect(false);
+      })
+      .on("from-server", (event: Message) => {
+        switch (event?.command) {
+          case "getavailableplayers":
+            break;
+          default:
+            break;
         }
 
-        // if the (most recent) server response does not have a username
-      } else if (refUser.current?.username == null) {
-        // if username is not null
-        if (username != null) {
-          console.log("setting usernames");
-          try {
-            let _userCommand = deepCopy(refUser.current) as Message;
+        console.log(`event`, event);
+      });
 
-            _userCommand.username = username;
-            _userCommand.command = "setuser";
-            sendMessage(JSON.stringify(_userCommand));
-          } catch (ex) {
-            console.log("error", ex);
-          }
-        }
-      } else {
-      }
-    },
-    onClose(event) {
-      console.log(`onClose(event)`, event);
-      setCanConnect(false);
-    },
-    onError(event) {
-      console.log(`onError(event)`, event);
-    },
-    share: true,
-  };
+    setSocket(_socket);
+    if (false) refSocket.current?.connect();
+  }
+  // https://stackoverflow.com/questions/73781573/socket-io-server-connection-fires-multiple-times
 
-  const WS_URL = () => `ws://${ip}:${port}?username=${username}`;
-  let webSocket = useWebSocket(WS_URL(), options);
-  const { readyState, sendMessage } = webSocket;
+  //?username=${username}
 
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: "Connecting",
-    [ReadyState.OPEN]: "Open",
-    [ReadyState.CLOSING]: "Closing",
-    [ReadyState.CLOSED]: "Closed",
-    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-  }[readyState!];
+  // : Socket<any, any, any, any>
+  // : Socket<DefaultEventsMap, DefaultEventsMap>
 
   return (
     <>
       <div className="row">
         <div className="col-1">
-          <span>Command: {(user as any)?.command}</span>
+          <span>Status: {String(isConnected)}</span>
         </div>
-        <div className="col-1">
-          <span>Status: {connectionStatus}</span>
-        </div>
-        <div className="col-1">
+        <div className="col-1" hidden={!isConnected}>
           <button
             className="btn btn-primary"
             onClick={() => {
               console.log(`user from test before sending`, refUser.current);
-              return sendMessage(JSON.stringify(user));
+              socket.emit("from-client", {});
             }}
           >
             test
+          </button>
+        </div>
+        <div className="col-1" hidden={isConnected}>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              socket.connect();
+            }}
+          >
+            connect
           </button>
         </div>
         <div className="col-1">
@@ -110,6 +106,15 @@ const BoardContainer: React.FC<{
           </div>
         )}
       </div>
+      {isConnected && (
+        <div className="row">
+          <Picker
+            inputSocket={socket}
+            inputUsername={username}
+            inputPlayers={players}
+          />
+        </div>
+      )}
     </>
   );
 };

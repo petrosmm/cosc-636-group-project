@@ -1,58 +1,90 @@
-import { WebSocketServer } from "ws";
-import http from "http";
+import * as http from "http";
 import { v4 } from "uuid";
-import { Game, Message, MessageClient, User } from "@lib/lib";
+import { Game, Message, MessageClient } from "@lib/lib";
 import Enumerable from "linq";
-import { addUsernameIfMissing, purgeEmptyClients } from "./functions.js";
+import { purgeEmptyClients } from "./functions.js";
+import { Server } from "socket.io";
 
-// Spinning the HTTP server and the WebSocket server.
-const server = http.createServer();
-const wssServer = new WebSocketServer({ server });
+const serverHttp = http.createServer();
+
+const wssServer = new Server(serverHttp, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 const port = 8081;
 
-server.listen(port, () => {
+serverHttp.listen(port, () => {
   console.log(`WebSocket server is running on port ${port}`);
 });
 
 // I'm maintaining all active connections in this object
 let clients: MessageClient[] = [];
-
 let games: Game[] = [];
 
-// A new client connection request received
-wssServer.on("connection", function (connection) {
+wssServer.on("connection", (connection) => {
   const userId = v4();
+  const username = new URL(
+    "http://example.com" + connection.request.url!
+  )?.searchParams.get("username")!;
 
-  console.log(`User ${userId} connected.\r\n`);
+  console.log(`User ${userId} (${username}) connected.\r\n`);
 
-  // Store the new connection and handle messages
-  clients.push({ userId: userId, socket: connection });
+  let clientNew = { userId: userId, username: username, socket: connection };
+  let clientsPossible = clients.filter(
+    (p) => p.username == username || p.userId == userId
+  );
 
-  let userWithIdOnly: User = { userId: userId };
-  let data = JSON.stringify(userWithIdOnly);
+  // only add client
+  if (clientsPossible?.length > 0) {
+    clientsPossible?.forEach((p, index) => {
+      return;
+      // let index = clients.findIndex((_p) => _p?.userId == p?.userId);
+      p.socket.disconnect();
+      delete clients[index];
+    });
+  }
 
+  // always
+  clients.push(clientNew);
+
+  console.log(`clientNew`, clientNew.userId, clientNew.username);
+
+  let userWithInfoOnly = { ...clientNew };
+  userWithInfoOnly.socket = null!;
+
+  let clientSpecific = clients.find((p) => p?.userId == userId);
+  console.log("\r\nsending back stuff\r\n");
+  if (false) {
+    if (clientSpecific?.username != null) {
+      let clientsPotential = clients.filter(
+        (p) => p?.username == username && p?.userId != userId
+      );
+
+      console.log(`clientsPotential`, clientsPotential);
+
+      if (false)
+        if (clientsPotential?.length > 0) {
+          throw new Error("client exists with different userId, please fix!");
+        }
+    }
+  }
   // send back the user with the guid
-  console.log("\r\n\r\n\r\n\r\nsending back stuff\r\n\r\n\r\n\r\n");
-  clients.find((p) => p?.userId == userId)?.socket?.send(data);
+  clientSpecific?.socket?.emit("from-server", userWithInfoOnly);
 
-  connection.on("message", function (event, isBinary) {
-    let dataLessRaw = event?.toString();
-    if (dataLessRaw?.length > 0) {
-      let messageIncoming = JSON.parse(event?.toString()) as Message;
+  connection.on("from-client", (data) => {
+    let dataParsed = data as Message;
 
-      console.log(`messageIncoming`, messageIncoming);
+    if (dataParsed != null) {
+      console.log(`messageIncoming`, dataParsed);
 
-      switch (messageIncoming?.command) {
-        case "setuser":
-          addUsernameIfMissing(messageIncoming, clients);
-
-          break;
-
+      switch (dataParsed?.command) {
         case "propose":
-          if (messageIncoming.from != null && messageIncoming.to) {
+          if (dataParsed.from != null && dataParsed.to) {
             let _clientsAsPlayers = Enumerable.from(clients)
               .where((p) =>
-                [messageIncoming.from, messageIncoming.to]
+                [dataParsed.from, dataParsed.to]
                   .filter(Boolean)
                   .includes(p.username)
               )
@@ -65,16 +97,31 @@ wssServer.on("connection", function (connection) {
           break;
 
         case "getavailableplayers":
-          let _clientsAsAvailablePlayers = Enumerable.from(clients)
-            .select((p) => {
+          console.log("check player", clients);
+          let values = {} as Record<string, string>;
+          let _clientsAsAvailablePlayers = Enumerable.from(clients).select(
+            (p) => {
               p.socket = null!;
-              return p;
-            })
-            .toArray();
+              return p.username;
+            }
+          );
 
-          this.send(JSON.stringify(_clientsAsAvailablePlayers));
+          if (false)
+            _clientsAsAvailablePlayers = _clientsAsAvailablePlayers.where(
+              (p) => p != username
+            );
+
+          _clientsAsAvailablePlayers.forEach((p, index) => {
+            values[index.toString()] = p!;
+          });
+
+          connection.emit("from-server", {
+            command: "getavailableplayers",
+            values: values,
+          } as Message);
           break;
 
+        // no case
         default:
           console.log("No valid command!");
           let _clients = Enumerable.from(clients)
@@ -88,13 +135,13 @@ wssServer.on("connection", function (connection) {
 
           let client = Enumerable.from(_clients).firstOrDefault(
             (p) =>
-              p.userId == messageIncoming.userId ||
-              p.username == messageIncoming?.username
+              p.userId == dataParsed.userId ||
+              p.username == dataParsed?.username
           );
 
           if (client != null) {
             console.log("found client!");
-            this.send(JSON.stringify(client));
+            connection.send(JSON.stringify(client));
           }
 
           break;

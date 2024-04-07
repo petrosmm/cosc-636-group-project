@@ -50,7 +50,7 @@ function App() {
                 className="btn btn-primary"
                 onClick={() => setCanConnect(true)}
               >
-                Connect
+                Login...
               </button>
             </div>
             <div className="col-1 me-5">

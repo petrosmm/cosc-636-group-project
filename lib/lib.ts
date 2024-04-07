@@ -1,19 +1,26 @@
-import WebSocket from "ws";
+import { Socket } from "socket.io";
 
 export type User = {
+  /** @deprecated */
   userId: string;
   username?: string;
 };
 
 export type MessageClient = User & {
-  socket: WebSocket;
+  socket: Socket<any, any, any, any>;
 };
 
 export type Message = User & {
-  command?: "setuser" | "makemove" | "propose" | "getavailableplayers";
+  command?:
+    | "proposeuser"
+    | "setuser"
+    | "makemove"
+    | "propose"
+    | "getavailableplayers";    
+  values?: Record<string, string>;
+  
   to?: string;
   from?: string;
-  values?: Record<string, string>;
 };
 
 export class Game {
