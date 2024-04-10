@@ -31,10 +31,8 @@ wssServer.on("connection", (connection) => {
 
   console.log(`User ${userId} (${username}) connected.\r\n`);
 
-  // console.log(`connection.client`, connection.client);
-  // console.log(connection);
   let clientNew = {
-    userId: userId,
+    userId: connection.id,
     username: username,
     socket: connection,
   };
@@ -81,98 +79,122 @@ wssServer.on("connection", (connection) => {
   // send back the user with the guid
   clientSpecific?.socket?.emit("from-server", userWithInfoOnly);
 
-  connection.on("from-client", (data) => {
+  connection.on("from-client", async (data) => {
     let dataParsed = data as Message;
 
     if (dataParsed != null) {
       console.log(`messageIncoming`, dataParsed);
 
-      switch (dataParsed?.command) {
-        case "test":
-          console.log(`clients`, clients);
-          if (false)
-            new Promise<void>(async (resolve) => {
-              await wssServer.fetchSockets();
-              resolve();
+      await new Promise<void>((resolve) => {
+        switch (dataParsed?.command) {
+          case "test":
+            console.log(`clients`, clients);
+            if (false)
+              new Promise<void>(async (resolve) => {
+                await wssServer.fetchSockets();
+                resolve();
+              });
+            break;
+          case "propose":
+            if (dataParsed.from != null && dataParsed.to) {
+              let _clientsAsPlayers = Enumerable.from(clients)
+                .where((p) =>
+                  [dataParsed.from, dataParsed.to]
+                    .filter(Boolean)
+                    .includes(p.username)
+                )
+                .toArray();
+
+              if (_clientsAsPlayers?.length == 2) {
+              } else {
+              }
+            }
+            break;
+
+          case "getavailableplayers":
+            let values = {} as Record<string, string>;
+            let _clientsAsAvailablePlayers = Enumerable.from(clients)
+              .select((p) => {
+                p.socket = null!;
+                return p.username;
+              })
+              .distinct();
+
+            if (false)
+              _clientsAsAvailablePlayers = _clientsAsAvailablePlayers.where(
+                (p) => p != dataParsed.username
+              );
+
+            _clientsAsAvailablePlayers.forEach((p, index) => {
+              values[index.toString()] = p!;
             });
-          break;
-        case "propose":
-          if (dataParsed.from != null && dataParsed.to) {
-            let _clientsAsPlayers = Enumerable.from(clients)
-              .where((p) =>
-                [dataParsed.from, dataParsed.to]
-                  .filter(Boolean)
-                  .includes(p.username)
-              )
-              .toArray();
 
-            if (_clientsAsPlayers?.length == 2) {
-            } else {
+            connection.emit("from-server", {
+              command: "getavailableplayers",
+              values: values,
+            } as Message);
+            break;
+
+          case "proposeuser": {
+            console.log(`clients`, clients);
+            if (dataParsed.from != null && dataParsed.to != null) {
+              let client = clients.find((p) => p.username == dataParsed.to);
+
+              if (client != null) {
+                let dataParsedModified = dataParsed;
+                dataParsedModified.username = client.username;
+                client.socket?.emit("from-server", dataParsedModified);
+              }
             }
+            break;
           }
-          break;
 
-        case "getavailableplayers":
-          let values = {} as Record<string, string>;
-          let _clientsAsAvailablePlayers = Enumerable.from(clients)
-            .select((p) => {
-              p.socket = null!;
-              return p.username;
-            })
-            .distinct();
+          // no case
+          default:
+            if (false) {
+              console.log("No valid command!");
+              let _clients = Enumerable.from(clients)
+                .select((p) => {
+                  p.socket = null!;
+                  return p;
+                })
+                .toArray();
 
-          if (false)
-            _clientsAsAvailablePlayers = _clientsAsAvailablePlayers.where(
-              (p) => p != dataParsed.username
-            );
+              let client = Enumerable.from(_clients).firstOrDefault(
+                (p) =>
+                  p.userId == dataParsed.userId ||
+                  p.username == dataParsed?.username
+              );
 
-          _clientsAsAvailablePlayers.forEach((p, index) => {
-            values[index.toString()] = p!;
-          });
-
-          connection.emit("from-server", {
-            command: "getavailableplayers",
-            values: values,
-          } as Message);
-          break;
-
-        case "proposeuser": {
-          console.log(`clients`, clients);
-          if (dataParsed.from != null && dataParsed.to != null) {
-            let client = clients.find((p) => p.username == dataParsed.to);
-
-            if (client != null) {
-              let dataParsedModified = dataParsed;
-              dataParsedModified.username = client.username;
-              client.socket?.emit("from-server", dataParsedModified);
+              if (client != null) {
+                console.log("found client!");
+                connection.send(JSON.stringify(client));
+              }
             }
-          }
-          break;
+
+            break;
         }
 
-        // no case
+        resolve();
+      });
+
+      switch (dataParsed?.command) {
+        case "test":
+          await new Promise<void>(async (resolve) => {
+            let sockets = await wssServer.fetchSockets();
+            let socketsDebug = Enumerable.from(sockets)
+              .select((p) => {
+                const username = new URL(
+                  "http://example.com" + p.handshake.url
+                )?.searchParams.get("username")!;
+                return `${p.id}|${username}`;
+              })
+              .toArray();
+            console.log(`client-skies`, socketsDebug);
+            resolve();
+          });
+          break;
         default:
-          console.log("No valid command!");
-          let _clients = Enumerable.from(clients)
-            .select((p) => {
-              p.socket = null!;
-              return p;
-            })
-            .toArray();
-
-          console.log(`\r\n` + `clients`, _clients);
-
-          let client = Enumerable.from(_clients).firstOrDefault(
-            (p) =>
-              p.userId == dataParsed.userId ||
-              p.username == dataParsed?.username
-          );
-
-          if (client != null) {
-            console.log("found client!");
-            connection.send(JSON.stringify(client));
-          }
-
           break;
       }
 
