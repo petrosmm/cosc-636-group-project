@@ -31,7 +31,13 @@ wssServer.on("connection", (connection) => {
 
   console.log(`User ${userId} (${username}) connected.\r\n`);
 
-  let clientNew = { userId: userId, username: username, socket: connection };
+  // console.log(`connection.client`, connection.client);
+  // console.log(connection);
+  let clientNew = {
+    userId: userId,
+    username: username,
+    socket: connection,
+  };
   let clientsPossible = clients.filter(
     (p) => p.username == username || p.userId == userId
   );
@@ -51,8 +57,10 @@ wssServer.on("connection", (connection) => {
 
   console.log(`clientNew`, clientNew.userId, clientNew.username);
 
-  let userWithInfoOnly = { ...clientNew };
-  userWithInfoOnly.socket = null!;
+  let userWithInfoOnly = {
+    username: clientNew.username,
+    userId: null,
+  } as MessageClient;
 
   let clientSpecific = clients.find((p) => p?.userId == userId);
   console.log("\r\nsending back stuff\r\n");
@@ -80,6 +88,14 @@ wssServer.on("connection", (connection) => {
       console.log(`messageIncoming`, dataParsed);
 
       switch (dataParsed?.command) {
+        case "test":
+          console.log(`clients`, clients);
+          if (false)
+            new Promise<void>(async (resolve) => {
+              await wssServer.fetchSockets();
+              resolve();
+            });
+          break;
         case "propose":
           if (dataParsed.from != null && dataParsed.to) {
             let _clientsAsPlayers = Enumerable.from(clients)
@@ -97,18 +113,17 @@ wssServer.on("connection", (connection) => {
           break;
 
         case "getavailableplayers":
-          console.log("check player", clients);
           let values = {} as Record<string, string>;
-          let _clientsAsAvailablePlayers = Enumerable.from(clients).select(
-            (p) => {
+          let _clientsAsAvailablePlayers = Enumerable.from(clients)
+            .select((p) => {
               p.socket = null!;
               return p.username;
-            }
-          );
+            })
+            .distinct();
 
           if (false)
             _clientsAsAvailablePlayers = _clientsAsAvailablePlayers.where(
-              (p) => p != username
+              (p) => p != dataParsed.username
             );
 
           _clientsAsAvailablePlayers.forEach((p, index) => {
@@ -120,6 +135,20 @@ wssServer.on("connection", (connection) => {
             values: values,
           } as Message);
           break;
+
+        case "proposeuser": {
+          console.log(`clients`, clients);
+          if (dataParsed.from != null && dataParsed.to != null) {
+            let client = clients.find((p) => p.username == dataParsed.to);
+
+            if (client != null) {
+              let dataParsedModified = dataParsed;
+              dataParsedModified.username = client.username;
+              client.socket?.emit("from-server", dataParsedModified);
+            }
+          }
+          break;
+        }
 
         // no case
         default:

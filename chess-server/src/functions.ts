@@ -51,3 +51,5 @@ export function purgeEmptyClients(input: MessageClient[]) {
   input = input?.filter(Boolean);
   return input;
 }
+
+export default {};

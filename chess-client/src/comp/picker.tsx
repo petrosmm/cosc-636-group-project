@@ -1,5 +1,5 @@
 import { Message } from "@lib/lib";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useStateRef from "react-usestateref";
 import { Socket } from "socket.io-client";
 
@@ -7,32 +7,45 @@ const Picker: React.FC<{
   inputSocket: Socket<any, any>;
   inputUsername: string;
   inputPlayers?: string[];
-}> = ({ inputSocket, inputUsername }) => {
+  inputProposeUser: (
+    socket: Socket<any, any>,
+    usernameFrom: string,
+    usernameTo: string
+  ) => void;
+}> = ({ inputSocket, inputUsername, inputPlayers, inputProposeUser }) => {
   const [socket, setSocket, refSocket] = useStateRef(inputSocket);
+  const [players, setPlayers] = useState([] as string[]);
 
   useEffect(() => {
-    let doIgnore = false;
-
-    getPlayers();
-
-    return () => {
-      doIgnore = true;
-    };
+    setPlayers(inputPlayers ?? []);
   }, []);
-
-  function getPlayers() {
-    let message = {
-      command: "getavailableplayers",
-      username: inputUsername,
-    } as Message;
-
-    socket.emit("from-client", message);
-  }
 
   return (
     <>
-      <div className="col-12">hello from picker</div>
-      <div className="col-12"></div>
+      <div className="col-12">Online players</div>
+      <div className="col-12">
+        {players?.map((p, index) => {
+          let isLast = index == players.length - 1;
+          return (
+            <div key={index}>
+              {p == inputUsername ? (
+                <span>{p}*</span>
+              ) : (
+                <a
+                  onClick={() => {
+                    alert("Other user being alerted to request match.");
+                    inputProposeUser(socket, inputUsername, p);
+                  }}
+                  href="#"
+                >
+                  {p}
+                </a>
+              )}
+              {!isLast ? <br /> : null}
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 };

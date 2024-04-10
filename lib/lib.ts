@@ -13,12 +13,15 @@ export type MessageClient = User & {
 export type Message = User & {
   command?:
     | "proposeuser"
+    | "proposeuserconfirm"
+    | "proposeuserdecline"
     | "setuser"
     | "makemove"
     | "propose"
-    | "getavailableplayers";    
+    | "getavailableplayers"
+    | "test";
   values?: Record<string, string>;
-  
+
   to?: string;
   from?: string;
 };

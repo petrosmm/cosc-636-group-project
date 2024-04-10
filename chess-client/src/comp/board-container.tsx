@@ -3,6 +3,7 @@ import { Message, User } from "@lib/lib";
 import useStateRef from "react-usestateref";
 import { Socket, io } from "socket.io-client";
 import Picker from "./picker";
+import Enumerable from "linq";
 
 const BoardContainer: React.FC<{
   ip: string;
@@ -21,7 +22,7 @@ const BoardContainer: React.FC<{
   const [socket, setSocket, refSocket] = useStateRef(
     null as unknown as Socket<any, any>
   );
-  const [players, setPlayers] = useState([] as string[]);
+  const [players, setPlayers, refPlayers] = useStateRef([] as string[]);
 
   useEffect(() => {
     let doIgnore = false;
@@ -32,6 +33,8 @@ const BoardContainer: React.FC<{
       doIgnore = true;
     };
   }, []);
+
+  useEffect(() => {}, []);
 
   function makeSocket() {
     let _socket = io(WS_URL(), {
@@ -52,7 +55,49 @@ const BoardContainer: React.FC<{
       .on("from-server", (event: Message) => {
         switch (event?.command) {
           case "getavailableplayers":
+            if (event?.values !== undefined) {
+              const arrayFromRecords: Array<[string, string]> = Object.entries(
+                event?.values!
+              );
+
+              if (arrayFromRecords.length > 0) {
+                let players = Enumerable.from(arrayFromRecords)
+                  .select((p) => p[1])
+                  .toArray();
+
+                setPlayers(players);
+              }
+            }
             break;
+
+          case "proposeuser":
+            if (event?.from != null && event?.to != null) {
+              let isYes = window.confirm(
+                `User ${event?.from} wishes to have a game. Would you like play?`
+              );
+              if (isYes) {
+                let message = {
+                  command: "proposeuserconfirm",
+                  username: username,
+                  from: event?.from,
+                  to: event?.to,
+                } as Message;
+
+                socket.emit("from-client", message);
+              } else {
+                let message = {
+                  command: "proposeuserdecline",
+                  username: username,
+                  from: event?.from,
+                  to: event?.to,
+                } as Message;
+
+                socket.emit("from-client", message);
+              }
+            }
+            break;
+
+          // nothing else
           default:
             break;
         }
@@ -63,6 +108,31 @@ const BoardContainer: React.FC<{
     setSocket(_socket);
     if (false) refSocket.current?.connect();
   }
+
+  function getPlayers() {
+    let message = {
+      command: "getavailableplayers",
+      username: username,
+    } as Message;
+
+    socket.emit("from-client", message);
+  }
+
+  function proposeUser(
+    socket: Socket<any, any>,
+    usernameFrom: string,
+    usernameTo: string
+  ) {
+    let message = {
+      command: "proposeuser",
+      username: username,
+      from: usernameFrom,
+      to: usernameTo,
+    } as Message;
+
+    socket.emit("from-client", message);
+  }
+
   // https://stackoverflow.com/questions/73781573/socket-io-server-connection-fires-multiple-times
 
   //?username=${username}
@@ -80,8 +150,21 @@ const BoardContainer: React.FC<{
           <button
             className="btn btn-primary"
             onClick={() => {
+              getPlayers();
+            }}
+          >
+            Get Players...
+          </button>
+        </div>
+        <div className="col-1" hidden={!isConnected}>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
               console.log(`user from test before sending`, refUser.current);
-              socket.emit("from-client", {});
+              socket.emit("from-client", {
+                command: "test",
+                username: username,
+              } as Message);
             }}
           >
             test
@@ -97,22 +180,23 @@ const BoardContainer: React.FC<{
             connect
           </button>
         </div>
-        <div className="col-1">
-          <span>..................................</span>
-        </div>
-        {user && (
+        {false && username?.length > 0 && (
           <div className="col-2">
-            <span>userid: {user?.userId}</span>
+            <span>username: {username}</span>
           </div>
         )}
       </div>
-      {isConnected && (
+
+      {isConnected && players?.length > 0 && (
         <div className="row">
-          <Picker
-            inputSocket={socket}
-            inputUsername={username}
-            inputPlayers={players}
-          />
+          <div className="col-12">
+            <Picker
+              inputSocket={socket}
+              inputUsername={username}
+              inputPlayers={players}
+              inputProposeUser={proposeUser}
+            />
+          </div>
         </div>
       )}
     </>
