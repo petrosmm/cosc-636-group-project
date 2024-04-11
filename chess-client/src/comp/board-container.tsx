@@ -23,18 +23,21 @@ const BoardContainer: React.FC<{
     null as unknown as Socket<any, any>
   );
   const [players, setPlayers, refPlayers] = useStateRef([] as string[]);
+  
+  // let _socket = null as unknown as Socket<any, any>
+  function getSocket() {}
 
   useEffect(() => {
     let doIgnore = false;
-
-    makeSocket();
 
     return () => {
       doIgnore = true;
     };
   }, []);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    makeSocket();
+  }, []);
 
   function makeSocket() {
     let _socket = io(WS_URL(), {
@@ -54,7 +57,7 @@ const BoardContainer: React.FC<{
       })
       .on("from-server", (event: Message) => {
         switch (event?.command) {
-          case "getavailableplayers":
+          case "getavailableplayers": {
             if (event?.values !== undefined) {
               const arrayFromRecords: Array<[string, string]> = Object.entries(
                 event?.values!
@@ -68,34 +71,48 @@ const BoardContainer: React.FC<{
                 setPlayers(players);
               }
             }
-            break;
 
-          case "proposeuser":
+            break;
+          }
+
+          case "proposeuser": {
             if (event?.from != null && event?.to != null) {
               let isYes = window.confirm(
                 `User ${event?.from} wishes to have a game. Would you like play?`
               );
+              let message = null as unknown as Message;
+
               if (isYes) {
-                let message = {
+                message = {
                   command: "proposeuserconfirm",
                   username: username,
-                  from: event?.from,
-                  to: event?.to,
+                  from: event?.to,
+                  to: event?.from,
                 } as Message;
-
-                socket.emit("from-client", message);
               } else {
-                let message = {
+                message = {
                   command: "proposeuserdecline",
                   username: username,
-                  from: event?.from,
-                  to: event?.to,
+                  from: event?.to,
+                  to: event?.from,
                 } as Message;
-
-                socket.emit("from-client", message);
               }
+
+              if (_socket == null) {
+                throw new Error("Socket is null!");
+              }
+
+              _socket?.emit("from-client", message);
             }
+
             break;
+          }
+
+          case "startgame": {
+            alert(`starting game with ${event?.from}!!!`);
+
+            break;
+          }
 
           // nothing else
           default:
@@ -178,6 +195,16 @@ const BoardContainer: React.FC<{
             }}
           >
             connect
+          </button>
+        </div>
+        <div className="col-1">
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              console.log(socket);
+            }}
+          >
+            check socket
           </button>
         </div>
         {false && username?.length > 0 && (

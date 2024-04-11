@@ -1,4 +1,6 @@
 import { Message, MessageClient } from "@lib/lib";
+import Enumerable from "linq";
+import { Server } from "socket.io";
 
 export function addUsernameIfMissing(
   message: Message,
@@ -52,4 +54,18 @@ export function purgeEmptyClients(input: MessageClient[]) {
   return input;
 }
 
-export default {};
+export async function getSocket(
+  server: Server<any, any, any, any>,
+  socketId: string
+) {
+  let sockets = await getSockets(server);
+  let socket = Enumerable.from(sockets).firstOrDefault((p) => p.id == socketId);
+
+  return socket;
+}
+
+export async function getSockets(server: Server<any, any, any, any>) {
+  let sockets = await server.fetchSockets();
+
+  return sockets;
+}

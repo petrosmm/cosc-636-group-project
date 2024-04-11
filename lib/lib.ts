@@ -15,6 +15,7 @@ export type Message = User & {
     | "proposeuser"
     | "proposeuserconfirm"
     | "proposeuserdecline"
+    | "startgame"
     | "setuser"
     | "makemove"
     | "propose"

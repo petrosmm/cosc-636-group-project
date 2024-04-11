@@ -1,8 +1,8 @@
 import * as http from "http";
 import { v4 } from "uuid";
-import { Game, Message, MessageClient } from "@lib/lib";
+import { Game, Message, MessageClient, User } from "@lib/lib";
 import Enumerable from "linq";
-import { purgeEmptyClients } from "./functions.js";
+import { getSocket, getSockets, purgeEmptyClients } from "./functions.js";
 import { Server } from "socket.io";
 
 const serverHttp = http.createServer();
@@ -111,44 +111,6 @@ wssServer.on("connection", (connection) => {
             }
             break;
 
-          case "getavailableplayers":
-            let values = {} as Record<string, string>;
-            let _clientsAsAvailablePlayers = Enumerable.from(clients)
-              .select((p) => {
-                p.socket = null!;
-                return p.username;
-              })
-              .distinct();
-
-            if (false)
-              _clientsAsAvailablePlayers = _clientsAsAvailablePlayers.where(
-                (p) => p != dataParsed.username
-              );
-
-            _clientsAsAvailablePlayers.forEach((p, index) => {
-              values[index.toString()] = p!;
-            });
-
-            connection.emit("from-server", {
-              command: "getavailableplayers",
-              values: values,
-            } as Message);
-            break;
-
-          case "proposeuser": {
-            console.log(`clients`, clients);
-            if (dataParsed.from != null && dataParsed.to != null) {
-              let client = clients.find((p) => p.username == dataParsed.to);
-
-              if (client != null) {
-                let dataParsedModified = dataParsed;
-                dataParsedModified.username = client.username;
-                client.socket?.emit("from-server", dataParsedModified);
-              }
-            }
-            break;
-          }
-
           // no case
           default:
             if (false) {
@@ -179,26 +141,95 @@ wssServer.on("connection", (connection) => {
       });
 
       switch (dataParsed?.command) {
-        case "test":
-          await new Promise<void>(async (resolve) => {
-            let sockets = await wssServer.fetchSockets();
-            let socketsDebug = Enumerable.from(sockets)
-              .select((p) => {
-                const username = new URL(
-                  "http://example.com" + p.handshake.url
-                )?.searchParams.get("username")!;
-                return `${p.id}|${username}`;
-              })
+        case "getavailableplayers": {
+          let values = {} as Record<string, string>;
+          if (false) {
+            let sockets = await getSockets(wssServer);
+            let socketIds = Enumerable.from(sockets)
+              .select((p) => p.id)
               .toArray();
-            console.log(`client-skies`, socketsDebug);
+          }
+          let _clientsAsAvailablePlayers = Enumerable.from(clients)
+            .select((p) => {
+              return p.username;
+            })
+            .distinct();
+
+          if (false)
+            _clientsAsAvailablePlayers = _clientsAsAvailablePlayers.where(
+              (p) => p != dataParsed.username
+            );
+
+          _clientsAsAvailablePlayers.forEach((p, index) => {
+            values[index.toString()] = p!;
+          });
+
+          connection.emit("from-server", {
+            command: "getavailableplayers",
+            values: values,
+          } as Message);
+
+          break;
+        }
+
+        case "proposeuser": {
+          if (dataParsed.from != null && dataParsed.to != null) {
+            let client = clients.find((p) => p.username == dataParsed.to);
+
+            if (client != null) {
+              let dataParsedModified = dataParsed;
+              dataParsedModified.username = client.username;
+              let socket = await getSocket(wssServer, client.userId);
+              socket?.emit("from-server", dataParsedModified);
+            }
+          }
+
+          break;
+        }
+
+        case "proposeuserconfirm": {
+          let client = clients.find((p) => p.username == dataParsed.to);
+
+          if (client != null) {
+            let dataParsedModified = dataParsed;
+            dataParsedModified.username = dataParsed.from;
+            dataParsedModified.command = "startgame";
+            let socket = await getSocket(wssServer, client.userId);
+            socket?.emit("from-server", dataParsedModified);
+          }
+
+          break;
+        }
+
+        case "test": {
+          await new Promise<void>(async (resolve) => {
+            let id = clients.find(
+              (p) => p.username == dataParsed.username
+            )?.userId;
+            // let sockets = await wssServer.fetchSockets();
+            // let socketsDebug = Enumerable.from(sockets)
+            //   .select((p) => {
+            //     const username = new URL(
+            //       "http://example.com" + p.handshake.url
+            //     )?.searchParams.get("username")!;
+            //     return { username: username, userId: p.id } as User;
+            //   })
+            //   .toArray();
+
+            let socket = await getSocket(wssServer, id);
+
+            console.log(`client-skies`, socket);
             resolve();
           });
+
           break;
+        }
+
         default:
           break;
       }
 
-      clients = purgeEmptyClients(clients);
+      if (false) clients = purgeEmptyClients(clients);
     }
   });
 });
