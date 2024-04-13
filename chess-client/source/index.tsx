@@ -2,8 +2,6 @@ import React from "react";
 import App from "./app";
 import ReactDOM from "react-dom/client";
 
-// import "bootstrap/dist/css/bootstrap.css";
-
 const root = ReactDOM.createRoot(document.getElementById("app-placeholder") as HTMLElement);
 root.render(
    <React.StrictMode>
