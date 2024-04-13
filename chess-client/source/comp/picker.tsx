@@ -1,4 +1,4 @@
-import { Message } from "@lib/lib";
+import React from "react";
 import { useEffect, useState } from "react";
 import useStateRef from "react-usestateref";
 import { Socket } from "socket.io-client";

@@ -1,0 +1,44 @@
+{
+   "author": "",
+   "dependencies": {
+      "linq": "^3.2.4",
+      "socket.io": "^4.7.5",
+      "meaningful-string": "^1.4.0"
+   },
+   "devDependencies": {
+      "concurrently": "^7.0.0",
+      "husky": "^7.0.4",
+      "prettier": "^2.5.1",
+      "typescript": "^4.5.5",
+      "@types/ws": "^8.5.10"
+   },
+   "engines": {
+      "npm": ">=8.0.0",
+      "node": ">=16.0.0"
+   },
+   "license": "ISC",
+   "name": "chess-monorepo",
+   "scripts": {
+      "build": "npm run build:client && npm run build:server",
+      "build:client": "cd chess-client && npm run build",
+      "build:client:check": "cd chess-client && npm run build:check",
+      "build:server": "cd chess-server && npm run build",
+      "build:server:check": "cd chess-server && npm run build:check",
+      "clean": "npm run clean:client && npm run clean:server",
+      "clean:client": "cd chess-client && npm run clean",
+      "clean:client:modules": "cd chess-client && npm run clean:modules",
+      "clean:modules": "rm -rf node_modules && npm run clean:client:modules && npm run clean:server:modules",
+      "clean:server": "cd chess-server && npm run clean",
+      "clean:server:modules": "cd chess-server && npm run clean:modules",
+      "deploy-assets": "npm run build:client && rm -rf chess-server/public && cp -a chess-client/distribution chess-server/public",
+      "format:check": "prettier --list-different './chess-{client,server}/**/*.{js,ts,tsx}' './**/*.json'",
+      "format:fix": "prettier --write './chess-{client,server}/**/*.{js,ts,tsx}' './**/*.json'",
+      "install:client": "cd chess-client && npm install",
+      "install:server": "cd chess-server && npm install",
+      "postinstall": "npm run install:client && npm run install:server",
+      "start:dev": "concurrently --kill-others \"npm run start:dev:server\" \"npm run start:dev:client\"",
+      "start:dev:client": "cd chess-client && npm run start:dev",
+      "start:dev:server": "cd chess-server && npm run start:dev",
+      "start:server": "cd chess-server && npm run start"
+   }
+}

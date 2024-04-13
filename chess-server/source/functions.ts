@@ -1,6 +1,7 @@
-import { Message, MessageClient } from "@lib/lib";
+
 import Enumerable from "linq";
 import { Server } from "socket.io";
+import { Message, MessageClient } from "../../source/lib";
 
 export function addUsernameIfMissing(
   message: Message,

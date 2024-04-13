@@ -1,9 +1,8 @@
 import * as http from "http";
-import { v4 } from "uuid";
-import { Game, Message, MessageClient, User } from "@lib/lib";
 import Enumerable from "linq";
-import { getSocket, getSockets, purgeEmptyClients } from "./functions.js";
+import { getSocket, getSockets, purgeEmptyClients } from "./functions";
 import { Server } from "socket.io";
+import { MessageClient, Game, Message } from "../../source/lib";
 
 const serverHttp = http.createServer();
 
@@ -24,7 +23,7 @@ let clients: MessageClient[] = [];
 let games: Game[] = [];
 
 wssServer.on("connection", (connection) => {
-  const userId = v4();
+  const userId = "";
   const username = new URL(
     "http://example.com" + connection.request.url!
   )?.searchParams.get("username")!;
@@ -179,7 +178,7 @@ wssServer.on("connection", (connection) => {
             if (client != null) {
               let dataParsedModified = dataParsed;
               dataParsedModified.username = client.username;
-              let socket = await getSocket(wssServer, client.socketId);
+              let socket = await getSocket(wssServer, client.socketId!);
               socket?.emit("from-server", dataParsedModified);
             }
           }
@@ -194,7 +193,7 @@ wssServer.on("connection", (connection) => {
             let dataParsedModified = dataParsed;
             dataParsedModified.username = dataParsed.from;
             dataParsedModified.command = "startgame";
-            let socket = await getSocket(wssServer, client.socketId);
+            let socket = await getSocket(wssServer, client.socketId!);
             socket?.emit("from-server", dataParsedModified);
           }
 
@@ -202,25 +201,28 @@ wssServer.on("connection", (connection) => {
         }
 
         case "test": {
-          await new Promise<void>(async (resolve) => {
-            let id = clients.find(
-              (p) => p.username == dataParsed.username
-            )?.socketId;
-            // let sockets = await wssServer.fetchSockets();
-            // let socketsDebug = Enumerable.from(sockets)
-            //   .select((p) => {
-            //     const username = new URL(
-            //       "http://example.com" + p.handshake.url
-            //     )?.searchParams.get("username")!;
-            //     return { username: username, userId: p.id } as User;
-            //   })
-            //   .toArray();
+          let game = new Game("max", "virgil");
+          console.log(`game`, game);
+          if (false)
+            await new Promise<void>(async (resolve) => {
+              let id = clients.find(
+                (p) => p.username == dataParsed.username
+              )?.socketId;
+              // let sockets = await wssServer.fetchSockets();
+              // let socketsDebug = Enumerable.from(sockets)
+              //   .select((p) => {
+              //     const username = new URL(
+              //       "http://example.com" + p.handshake.url
+              //     )?.searchParams.get("username")!;
+              //     return { username: username, userId: p.id } as User;
+              //   })
+              //   .toArray();
 
-            let socket = await getSocket(wssServer, id);
+              let socket = await getSocket(wssServer, id!);
 
-            console.log(`client-skies`, socket);
-            resolve();
-          });
+              console.log(`client-skies`, socket);
+              resolve();
+            });
 
           break;
         }
