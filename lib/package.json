@@ -3,7 +3,8 @@
   "dependencies": {
     "@types/socket.io": "^3.0.2",
     "socket.io": "^4.7.5",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "linq": "^4.0.2"
   },
   "devDependencies": {
     "typescript": "~4.9.5",
