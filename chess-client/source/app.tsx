@@ -3,12 +3,13 @@ import useStateRef from "react-usestateref";
 import BoardContainer from "./comp/board-container";
 import { generateUsername } from "../../source/functions";
 import React from "react";
+import { PORT_SERVER } from "../../source/lib";
 
 let _username = generateUsername();
 
 function App() {
    const [serverIP, setServerIP, refServerIP] = useStateRef("127.0.0.1");
-   const [serverPort, setServerPort, refServerPort] = useStateRef("8081");
+   const [serverPort, setServerPort, refServerPort] = useStateRef(String(PORT_SERVER));
    const [username, setUsername] = useState(_username);
    const [test, setTest] = useState("");
    const [canConnect, setCanConnect] = useState(false);

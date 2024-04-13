@@ -1,12 +1,12 @@
-// import Enumerable from "linq";
-// /** white always goes first */
 import { Socket } from "socket.io";
 import { generateRandomNumber } from "./functions";
 
 const Enumerable = require("linq");
 
+export const PORT_SERVER = 8081;
+
 export type User = {
-  socketId: string| null;
+  socketId: string | null;
   username?: string;
 };
 
@@ -32,7 +32,6 @@ export type Message = User & {
   from?: string;
 };
 
-/** white always goes first */
 type color = "white" | "black";
 type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 
@@ -46,29 +45,30 @@ type Square2 = null | {}; // 'null' for empty, string could represent pieces, e.
 export class Piece {
   private type?: type;
 
-  public Piece(type: type) {
+  constructor(type: type) {
     this.type = type;
   }
 }
 
 export class Game {
   private players: Player[] = [];
-  private chessboard: (Piece | null)[][] = [];
+  private board: (Piece | null)[][] = [];
 
   public constructor(username1: string, username2: string) {
     this.fillBoard();
+    console.log(`board`, this.board);
     this.assignPlayers(username1, username2);
   }
 
   private fillBoard() {
     for (let row = 1; row <= 15; row += 2) {
-      let rowArray: (Piece | null)[] | null[] = [];
+      let rowArray: (Piece | null)[] = [];
       for (let col = 2; col <= 16; col += 2) {
-        rowArray.push(null);
+        rowArray.push(new Piece("bishop"));
         //  throw Error("some stuff");
       }
 
-      this.chessboard.push(rowArray);
+      this.board.push(rowArray);
     }
   }
 

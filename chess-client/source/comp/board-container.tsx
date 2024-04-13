@@ -104,7 +104,14 @@ const BoardContainer: React.FC<{
                }
 
                case "startgame": {
-                  alert(`starting game with ${event?.from}!!!`);
+                  alert(`Starting game with ${event?.from}. Please remember white goes first!`);
+
+                  let message = {
+                     command: "getboard",
+                     username: username
+                  } as Message;
+
+                  _socket?.emit("from-client", message);
 
                   break;
                }

@@ -2,7 +2,7 @@ import * as http from "http";
 import Enumerable from "linq";
 import { getSocket, getSockets, purgeEmptyClients } from "./functions";
 import { Server } from "socket.io";
-import { MessageClient, Game, Message } from "../../source/lib";
+import { MessageClient, Game, Message, PORT_SERVER } from "../../source/lib";
 
 const serverHttp = http.createServer();
 
@@ -12,10 +12,9 @@ const wssServer = new Server(serverHttp, {
     methods: ["GET", "POST"],
   },
 });
-const port = 8081;
 
-serverHttp.listen(port, () => {
-  console.log(`WebSocket server is running on port ${port}`);
+serverHttp.listen(PORT_SERVER, () => {
+  console.log(`WebSocket server is running on port ${PORT_SERVER}`);
 });
 
 // I'm maintaining all active connections in this object
