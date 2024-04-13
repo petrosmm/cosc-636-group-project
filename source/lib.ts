@@ -78,22 +78,27 @@ export class Game {
         let piece: Piece | null = null;
 
         // Place pawns
-        if (row === 3) {
-          // Second row from the bottom, white pawns
-          piece = new Piece("pawn", "white");
-        } else if (row === 13) {
-          // Second row from the top, black pawns
-          piece = new Piece("pawn", "black");
+        if (row === 3 || row === 13) {
+          let color: color = null!;
+          if (row === 3) {
+            // Second row from the top, black pawns
+            color = "black";
+          } else if (row === 13) {
+            // Second row from the bottom, white pawns
+            color = "white";
+          }
+
+          piece = new Piece("pawn", color);
         }
 
         // Place the other pieces on the first and last rows
         if (row === 1 || row === 15) {
           let color: color = null!;
           if (row === 1) {
-            color = "white";
+            color = "black";
           }
           if (row === 15) {
-            color = "black";
+            color = "white";
           }
 
           if (col === 2 || col === 16) {
@@ -103,11 +108,19 @@ export class Game {
           } else if (col === 6 || col === 12) {
             piece = new Piece("bishop", color);
           } else if (col === 8) {
-            piece =
-              row === 1 ? new Piece("queen", color) : new Piece("king", color);
+            piece = new Piece("king", color);
+            if (false)
+              piece =
+                row === 1
+                  ? new Piece("queen", color)
+                  : new Piece("king", color);
           } else if (col === 10) {
-            piece =
-              row === 1 ? new Piece("king", color) : new Piece("queen", color);
+            piece = new Piece("queen", color);
+            if (false)
+              piece =
+                row === 1
+                  ? new Piece("king", color)
+                  : new Piece("queen", color);
           }
         }
 
