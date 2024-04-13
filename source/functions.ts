@@ -1,11 +1,9 @@
-
 const generate = require("meaningful-string");
 
 let options = {
   numberUpto: 60,
   joinBy: "",
 };
-
 
 export function generateRandomNumber() {
   // Generate a random number between 0 and 1
@@ -24,4 +22,17 @@ export function generateUsername() {
 
 export function titleCase(str: string) {
   return str.toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase());
+}
+
+export function generateRandomTextAndNumbers(length: number) {
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let randomString = "";
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    randomString += charset[randomIndex];
+  }
+
+  return randomString?.toLowerCase();
 }

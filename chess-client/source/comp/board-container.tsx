@@ -5,6 +5,7 @@ import Picker from "./picker";
 import Enumerable from "linq";
 import { Message, User } from "../../../source/lib";
 import React from "react";
+import Board from "./board";
 
 const BoardContainer: React.FC<{
    ip: string;
@@ -207,7 +208,6 @@ const BoardContainer: React.FC<{
                </div>
             )}
          </div>
-
          {isConnected && players?.length > 0 && (
             <div className="row">
                <div className="col-12">
@@ -215,6 +215,10 @@ const BoardContainer: React.FC<{
                </div>
             </div>
          )}
+
+         <div className="row">
+            <Board />
+         </div>
       </>
    );
 };

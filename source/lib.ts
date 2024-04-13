@@ -1,5 +1,8 @@
 import { Socket } from "socket.io";
-import { generateRandomNumber } from "./functions";
+import {
+  generateRandomNumber,
+  generateRandomTextAndNumbers,
+} from "./functions";
 
 const Enumerable = require("linq");
 
@@ -43,20 +46,28 @@ type Player = {
 type Square2 = null | {}; // 'null' for empty, string could represent pieces, e.g., 'WP' for white pawn
 
 export class Piece {
+  private id = "";
   private type?: type;
+  private color?: color;
 
-  constructor(type: type) {
+  constructor(type: type, color: color) {
+    this.id = generateRandomTextAndNumbers(5);
     this.type = type;
+    this.color = color;
+  }
+
+  public toString() {
+    return [this.color, this.type, this.id].join("|");
   }
 }
 
 export class Game {
   private players: Player[] = [];
   private board: (Piece | null)[][] = [];
+  private boardInactive: Piece[] = [];
 
   public constructor(username1: string, username2: string) {
     this.fillBoard();
-    console.log(`board`, this.board);
     this.assignPlayers(username1, username2);
   }
 
@@ -64,8 +75,43 @@ export class Game {
     for (let row = 1; row <= 15; row += 2) {
       let rowArray: (Piece | null)[] = [];
       for (let col = 2; col <= 16; col += 2) {
-        rowArray.push(new Piece("bishop"));
-        //  throw Error("some stuff");
+        let piece: Piece | null = null;
+
+        // Place pawns
+        if (row === 3) {
+          // Second row from the bottom, white pawns
+          piece = new Piece("pawn", "white");
+        } else if (row === 13) {
+          // Second row from the top, black pawns
+          piece = new Piece("pawn", "black");
+        }
+
+        // Place the other pieces on the first and last rows
+        if (row === 1 || row === 15) {
+          let color: color = null!;
+          if (row === 1) {
+            color = "white";
+          }
+          if (row === 15) {
+            color = "black";
+          }
+
+          if (col === 2 || col === 16) {
+            piece = new Piece("rook", color);
+          } else if (col === 4 || col === 14) {
+            piece = new Piece("knight", color);
+          } else if (col === 6 || col === 12) {
+            piece = new Piece("bishop", color);
+          } else if (col === 8) {
+            piece =
+              row === 1 ? new Piece("queen", color) : new Piece("king", color);
+          } else if (col === 10) {
+            piece =
+              row === 1 ? new Piece("king", color) : new Piece("queen", color);
+          }
+        }
+
+        rowArray.push(piece);
       }
 
       this.board.push(rowArray);
@@ -81,14 +127,19 @@ export class Game {
       !randomNumberVal ? "black" : "white",
     ];
 
-    let x = Enumerable.from(colors).firstOrDefault();
-    console.log(`colors2`, x);
-
     _players.forEach((p, index) => {
       let player = { username: p, color: colors[index] } as Player;
 
       this.players.push(player);
     });
+  }
+
+  public showBoard() {
+    console.log(`board`, JSON.stringify(this, null, "\t"));
+  }
+
+  public getBoard() {
+    return this.board;
   }
 
   public getOtherPlayer(colorGiven: color) {

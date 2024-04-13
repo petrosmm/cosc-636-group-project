@@ -85,14 +85,6 @@ wssServer.on("connection", (connection) => {
 
       await new Promise<void>((resolve) => {
         switch (dataParsed?.command) {
-          case "test":
-            console.log(`clients`, clients);
-            if (false)
-              new Promise<void>(async (resolve) => {
-                await wssServer.fetchSockets();
-                resolve();
-              });
-            break;
           case "propose":
             if (dataParsed.from != null && dataParsed.to) {
               let _clientsAsPlayers = Enumerable.from(clients)
@@ -107,6 +99,15 @@ wssServer.on("connection", (connection) => {
               } else {
               }
             }
+            break;
+
+          case "test":
+            if (false) console.log(`clients`, clients);
+            if (false)
+              new Promise<void>(async (resolve) => {
+                await wssServer.fetchSockets();
+                resolve();
+              });
             break;
 
           // no case
@@ -201,7 +202,8 @@ wssServer.on("connection", (connection) => {
 
         case "test": {
           let game = new Game("max", "virgil");
-          console.log(`game`, game);
+          game.showBoard();
+          
           if (false)
             await new Promise<void>(async (resolve) => {
               let id = clients.find(
