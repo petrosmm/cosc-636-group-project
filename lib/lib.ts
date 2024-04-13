@@ -3,8 +3,7 @@ import Enumerable from "linq";
 import { generateRandomNumber } from "./functions";
 
 export type User = {
-  /** @deprecated */
-  userId: string;
+  socketId: string;
   username?: string;
 };
 
@@ -52,7 +51,7 @@ export class Piece {
 // Initialize an empty board
 export class Game {
   private players: Player[] = [];
-  private chessboard: Piece[][];
+  private chessboard: (Piece | null)[][];
 
   public Game(username1: string, username2: string) {
     this.fillBoard();
@@ -61,15 +60,16 @@ export class Game {
 
   private fillBoard() {
     for (let row = 1; row <= 15; row += 2) {
-      let rowArray: Piece[] = [];
+      let rowArray: (Piece | null)[] | null[] = [];
       for (let col = 2; col <= 16; col += 2) {
-        rowArray.push(null!);
+        rowArray.push(null);
         throw Error("some stuff");
       }
 
       this.chessboard.push(rowArray);
     }
   }
+
   private assignPlayers(username1: string, username2: string) {
     let _players = [username1, username2];
     let randomNumber = generateRandomNumber();

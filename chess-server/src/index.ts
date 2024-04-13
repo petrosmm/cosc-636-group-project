@@ -32,19 +32,19 @@ wssServer.on("connection", (connection) => {
   console.log(`User ${userId} (${username}) connected.\r\n`);
 
   let clientNew = {
-    userId: connection.id,
+    socketId: connection.id,
     username: username,
     socket: connection,
   };
   let clientsPossible = clients.filter(
-    (p) => p.username == username || p.userId == userId
+    (p) => p.username == username || p.socketId == userId
   );
 
   // only add client
   if (clientsPossible?.length > 0) {
     clientsPossible?.forEach((p, index) => {
       return;
-      // let index = clients.findIndex((_p) => _p?.userId == p?.userId);
+      // let index = clients.findIndex((_p) => _p?.socketId == p?.socketId);
       p.socket.disconnect();
       delete clients[index];
     });
@@ -53,19 +53,19 @@ wssServer.on("connection", (connection) => {
   // always
   clients.push(clientNew);
 
-  console.log(`clientNew`, clientNew.userId, clientNew.username);
+  console.log(`clientNew`, clientNew.socketId, clientNew.username);
 
   let userWithInfoOnly = {
     username: clientNew.username,
-    userId: null,
+    socketId: null,
   } as MessageClient;
 
-  let clientSpecific = clients.find((p) => p?.userId == userId);
+  let clientSpecific = clients.find((p) => p?.socketId == userId);
   console.log("\r\nsending back stuff\r\n");
   if (false) {
     if (clientSpecific?.username != null) {
       let clientsPotential = clients.filter(
-        (p) => p?.username == username && p?.userId != userId
+        (p) => p?.username == username && p?.socketId != userId
       );
 
       console.log(`clientsPotential`, clientsPotential);
@@ -124,7 +124,7 @@ wssServer.on("connection", (connection) => {
 
               let client = Enumerable.from(_clients).firstOrDefault(
                 (p) =>
-                  p.userId == dataParsed.userId ||
+                  p.socketId == dataParsed.socketId ||
                   p.username == dataParsed?.username
               );
 
@@ -179,7 +179,7 @@ wssServer.on("connection", (connection) => {
             if (client != null) {
               let dataParsedModified = dataParsed;
               dataParsedModified.username = client.username;
-              let socket = await getSocket(wssServer, client.userId);
+              let socket = await getSocket(wssServer, client.socketId);
               socket?.emit("from-server", dataParsedModified);
             }
           }
@@ -194,7 +194,7 @@ wssServer.on("connection", (connection) => {
             let dataParsedModified = dataParsed;
             dataParsedModified.username = dataParsed.from;
             dataParsedModified.command = "startgame";
-            let socket = await getSocket(wssServer, client.userId);
+            let socket = await getSocket(wssServer, client.socketId);
             socket?.emit("from-server", dataParsedModified);
           }
 
@@ -205,7 +205,7 @@ wssServer.on("connection", (connection) => {
           await new Promise<void>(async (resolve) => {
             let id = clients.find(
               (p) => p.username == dataParsed.username
-            )?.userId;
+            )?.socketId;
             // let sockets = await wssServer.fetchSockets();
             // let socketsDebug = Enumerable.from(sockets)
             //   .select((p) => {

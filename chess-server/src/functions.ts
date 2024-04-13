@@ -7,11 +7,11 @@ export function addUsernameIfMissing(
   clients: MessageClient[]
 ) {
   try {
-    if (false) console.log(`user`, message.userId, message.username);
+    if (false) console.log(`user`, message.socketId, message.username);
 
     if (message?.username != null) {
       let client = clients.find(
-        (p) => p?.userId == message?.userId && p?.username == null
+        (p) => p?.socketId == message?.socketId && p?.username == null
       );
       if (false) console.log("client", client);
 
@@ -19,19 +19,19 @@ export function addUsernameIfMissing(
         let _client = client;
         _client.username = message.username;
 
-        let indexUser = clients.findIndex((p) => p.userId == message.userId);
+        let indexUser = clients.findIndex((p) => p.socketId == message.socketId);
         delete clients[indexUser];
         clients.push(_client);
 
         if (false) clients = purgeEmptyClients(clients);
       } else if (client == null) {
         client = clients.find(
-          (p) => p.userId != message?.userId && p.username == message.username
+          (p) => p.socketId != message?.socketId && p.username == message.username
         );
 
         if (client != null) {
           let _client = client;
-          _client.userId = message.userId;
+          _client.socketId = message.socketId;
 
           let indexUser = clients.findIndex(
             (p) => p.username == message.username
