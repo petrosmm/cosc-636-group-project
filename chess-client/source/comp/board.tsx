@@ -30,22 +30,17 @@ const Board: React.FC<{}> = ({}) => {
 
                      let classNameCol = "col ";
                      if (_p?.getType() == "pawn") {
-                        console.log(indexRowOriginal, indexColOriginal);
                         classNameCol = "col bg-warning";
-                        console.log(classNameCol);
                      }
 
                      if (_p?.getType() == "knight") {
-                        console.log(indexRowOriginal, indexColOriginal);
                         classNameCol = "col bg-warning";
-                        console.log(classNameCol);
                      }
 
                      return (
                         <div
                            onClick={() => {
                               let moves = getMoves(_p, game.getBoard(), indexColOriginal, indexRowOriginal);
-                              console.log(indexColOriginal, indexRowOriginal);
                            }}
                            key={locationCol}
                            className={classNameCol}

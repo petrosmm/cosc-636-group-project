@@ -14,7 +14,7 @@ const directionsKing = [
   [2, 1], // Diagonals right
 ];
 
-const knightMoves = [
+const directionsKnight = [
   // Two squares along columns, one along row
   [-4, 1],
   [4, 1], // Upward L-moves
@@ -25,6 +25,17 @@ const knightMoves = [
   [1, 4], // Rightward L-moves
   [-1, -4],
   [1, -4], // Leftward L-moves
+];
+
+const directionsKnight2 = [
+  [1, 2],
+  [-1, 2],
+  [1, -2],
+  [-1, -2], // Horizontal first, then vertical
+  [2, 1],
+  [-2, 1],
+  [2, -1],
+  [-2, -1], // Vertical first, then horizontal
 ];
 
 const directionsQueen = [
@@ -53,6 +64,66 @@ const directionsBishop = [
   [2, -2],
   [-2, -2],
 ];
+
+export function getMoves(
+  piece: Piece | null,
+  board: board,
+  col: number,
+  row: number
+) {
+  try {
+    switch (piece?.getType()) {
+      case "knight":
+        {
+          let moves = getKnightMovesWithObstacles(row, col, board, piece);
+          console.log(`moves`, moves);
+        }
+        break;
+      case "pawn":
+        {
+          let moves = getPawnMovesWithObstacles(row, col, board, piece);
+          console.log(`moves`, moves);
+        }
+        break;
+
+      default:
+        break;
+    }
+  } catch (ex) {
+    console.log(ex);
+  }
+}
+
+export function getKnightMovesWithObstacles(
+  row: number,
+  column: number,
+  board: Array<Array<Piece | null>>,
+  piece: Piece | null
+): Array<[number, number]> {
+  let moves: Array<[number, number]> = [];
+  let myColor = piece?.getColor();
+  // All possible "L" moves for a knight
+
+  directionsKnight.forEach(([colChange, rowChange]) => {
+    let newColumn = column + colChange;
+    let newRow = row + rowChange;
+
+    console.log(`newColumn`, newColumn);
+    console.log(`newRow`, newRow);
+
+    // Check if new position is within bounds
+    if (newColumn >= 2 && newColumn <= 16 && newRow >= 1 && newRow <= 15) {
+      // Check if the square is occupied or not
+      let piece = board[newRow][newColumn];
+      if (piece === null || board[newRow][newColumn] !== null) {
+        // Assuming knight can move to an empty square or capture an opponent's piece
+        moves.push([newColumn, newRow]);
+      }
+    }
+  });
+
+  return moves;
+}
 
 function getKingMovesWithObstacles(
   column: number,
@@ -151,28 +222,6 @@ function getQueenMovesWithObstacles(
   return moves;
 }
 
-export function getMoves(
-  piece: Piece | null,
-  board: board,
-  col: number,
-  row: number
-) {
-  switch (piece?.getType()) {
-    case "pawn":
-      {
-        try {
-          let moves = getPawnMovesWithObstacles(row, col, board, piece);
-          console.log(`moves`, moves);
-        } catch (ex) {
-          console.log(ex);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-}
-
 export function findLocationOfPiece(board: board, piece: Piece) {
   let id = piece.getId();
   return Enumerable.from(board).firstOrDefault((p: Piece | null) => p);
@@ -186,7 +235,7 @@ export function getPawnMovesWithObstacles(
 ): Array<[number, number]> {
   let isBlack = piece?.getColor() == "black";
   let moves: Array<[number, number]> = [];
-  let startRow = isBlack ? 3 : 13; // Starting rows for white and black pawns
+  let startRow = isBlack ? 1 : 6; // Starting rows for white and black pawns
   let direction = isBlack ? 2 : -2; // Direction of movement depending on the pawn's color
 
   // Single move forward
@@ -194,10 +243,12 @@ export function getPawnMovesWithObstacles(
 
   if (newRow >= 1 && newRow <= 15 && board[newRow][column] === null) {
     moves.push([newRow, column]);
-    if (piece?.isFirstMove()) {
-      moves.push([newRow + 1, column]);
-    }
+    if (false)
+      if (piece?.isFirstMove()) {
+        moves.push([newRow + 1, column]);
+      }
 
+    console.log(row === startRow, row, startRow);
     // Double move from starting position
     if (row === startRow) {
       let twoStepsRow = row + 2 * direction;
@@ -206,6 +257,7 @@ export function getPawnMovesWithObstacles(
         twoStepsRow <= 15 &&
         board[twoStepsRow][column] === null
       ) {
+        console.log("Double move");
         moves.push([twoStepsRow, column]);
       }
     }
