@@ -35,35 +35,52 @@ export type Message = User & {
   from?: string;
 };
 
-type color = "white" | "black";
-type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
+export type color = "white" | "black";
+export type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
+export type board = (Piece | null)[][];
 
 type Player = {
   username: string; // Full name of the player
   color: color; // Chess game color assigned to the player
 };
 
-type Square2 = null | {}; // 'null' for empty, string could represent pieces, e.g., 'WP' for white pawn
-
 export class Piece {
   private id = "";
   private type?: type;
   private color?: color;
+  private _isFirstMove;
 
   constructor(type: type, color: color) {
     this.id = generateRandomTextAndNumbers(5);
     this.type = type;
     this.color = color;
+    this._isFirstMove = true;
   }
 
   public toString() {
     return [this.color, this.type, this.id].join("|");
   }
+
+  public getType() {
+    return this.type!;
+  }
+
+  public getId() {
+    return this.id!;
+  }
+
+  public getColor() {
+    return this.color;
+  }
+
+  public isFirstMove() {
+    return this._isFirstMove;
+  }
 }
 
 export class Game {
   private players: Player[] = [];
-  private board: (Piece | null)[][] = [];
+  private board: board = [];
   private boardInactive: Piece[] = [];
 
   public constructor(username1: string, username2: string) {
