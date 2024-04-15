@@ -48,13 +48,13 @@ export class Piece {
   private id = "";
   private type?: type;
   private color?: color;
-  private _isFirstMove;
+  public isFirstMove;
 
   constructor(type: type, color: color) {
     this.id = generateRandomTextAndNumbers(5);
     this.type = type;
     this.color = color;
-    this._isFirstMove = true;
+    this.isFirstMove = true;
   }
 
   public toString() {
@@ -73,19 +73,21 @@ export class Piece {
     return this.color;
   }
 
-  public isFirstMove() {
-    return this._isFirstMove;
+  public hasDoneFirstMove() {
+    return this.isFirstMove;
   }
 }
 
 export class Game {
   private players: Player[] = [];
-  private board: board = [];
   private boardInactive: Piece[] = [];
+  private turn: color;
+  public board: board = [];
 
   public constructor(username1: string, username2: string) {
     this.fillBoard();
     this.assignPlayers(username1, username2);
+    this.turn = "white";
   }
 
   private fillBoard() {
@@ -146,6 +148,29 @@ export class Game {
 
       this.board.push(rowArray);
     }
+
+    if (false) console.log(this.board);
+  }
+
+  public movePiece(
+    piece: Piece | null,
+    rowFrom: number,
+    columnFrom: number,
+    rowTo: number,
+    columnTo: number,
+    setGame: React.Dispatch<React.SetStateAction<Game>>
+  ) {
+    let _piece = this.board[rowFrom][columnFrom];
+
+    if (_piece != null) {
+      _piece.isFirstMove = false;
+      this.board[rowTo][columnTo] = _piece;
+      this.board[rowFrom][columnFrom] = null;
+      console.log(`_piece`, this.board[rowTo][columnTo]);
+    }
+    console.log(`this`, this);
+    if (false) setGame(this);
+    return this;
   }
 
   private assignPlayers(username1: string, username2: string) {

@@ -68,8 +68,8 @@ const directionsBishop = [
 export function getMoves(
   piece: Piece | null,
   board: board,
-  col: number,
-  row: number
+  row: number,
+  col: number
 ) {
   try {
     switch (piece?.getType()) {
@@ -236,22 +236,24 @@ export function getPawnMovesWithObstacles(
   let isBlack = piece?.getColor() == "black";
   let moves: Array<[number, number]> = [];
   let startRow = isBlack ? 1 : 6; // Starting rows for white and black pawns
-  let direction = isBlack ? 2 : -2; // Direction of movement depending on the pawn's color
+  let direction = isBlack ? 1 : -1; // Direction of movement depending on the pawn's color
 
   // Single move forward
   let newRow = row + direction;
+  console.log(`newRow`, newRow);
 
   if (newRow >= 1 && newRow <= 15 && board[newRow][column] === null) {
     moves.push([newRow, column]);
     if (false)
-      if (piece?.isFirstMove()) {
+      if (piece?.hasDoneFirstMove()) {
         moves.push([newRow + 1, column]);
       }
 
-    console.log(row === startRow, row, startRow);
     // Double move from starting position
-    if (row === startRow) {
+    if (piece?.hasDoneFirstMove() || row === startRow) {
+      console.log(row);
       let twoStepsRow = row + 2 * direction;
+      console.log(`twoStepsRow`, twoStepsRow);
       if (
         twoStepsRow >= 1 &&
         twoStepsRow <= 15 &&
