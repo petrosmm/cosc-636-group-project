@@ -13,7 +13,7 @@ const Board: React.FC<{}> = ({}) => {
 
    useEffect(() => {
       let doIgnore = false;
-      console.log("helo0");
+
       setGame(new Game("max", "virgil"));
 
       return () => {
@@ -21,10 +21,7 @@ const Board: React.FC<{}> = ({}) => {
       };
    }, []);
 
-   useEffect(() => {
-      console.log("helo");
-      console.log(`game`, game);
-   }, [game]);
+   useEffect(() => {}, []);
 
    return (
       <>
@@ -42,20 +39,13 @@ const Board: React.FC<{}> = ({}) => {
                         let display = ["cEng " + locationCol, _p?.toString()].join(" ");
                         let classNameCol = "col ";
 
-                        if (_p?.getType() == "pawn") {
-                           classNameCol = "col bg-warning";
-                        }
-
-                        if (_p?.getType() == "knight") {
+                        if (_p?.getType() != null) {
                            classNameCol = "col bg-warning";
                         }
 
                         return (
                            <div
                               onClick={() => {
-                                 console.log(`game`, game);
-                                 console.log(`game getboard`, game?.getBoard());
-
                                  let moves = getMoves(_p, game.getBoard(), indexRowOriginal, indexColOriginal);
                                  game.movePiece(_p, indexRowOriginal, indexColOriginal, 3, 0, setGame);
                               }}

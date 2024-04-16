@@ -35,21 +35,3 @@ export function generateRandomTextAndNumbers(length: number) {
 
    return randomString?.toLowerCase();
 }
-
-export function deepCopy(obj: any) {
-   // If obj is not an object or is null, return it as is
-   if (typeof obj !== "object" || obj === null) {
-      return obj;
-   }
-
-   // Create an empty object or array to hold the copied properties
-   const copy = Array.isArray(obj) ? [] : {};
-
-   // Iterate over each property of the object
-   for (let key in obj) {
-      // Recursively copy nested objects or arrays
-      (copy as any)[key] = deepCopy(obj[key]);
-   }
-
-   return copy;
-}
