@@ -79,7 +79,7 @@ export class Piece {
 export class Game {
    private players: Player[] = [];
    private boardInactive: Piece[] = [];
-   private turn: color;
+   public turn: color;
    public board: board = [];
 
    public constructor(username1: string, username2: string) {
@@ -143,7 +143,6 @@ export class Game {
    }
 
    public movePiece(
-      piece: Piece | null,
       rowFrom: number,
       columnFrom: number,
       rowTo: number,
