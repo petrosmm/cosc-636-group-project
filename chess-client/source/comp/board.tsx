@@ -53,10 +53,7 @@ const Board: React.FC<{}> = ({}) => {
                            <div
                               onClick={() => {
                                  let moves = getMoves(_p, game.getBoard(), indexRowOriginal, indexColOriginal);
-                                 let gameNew = game.movePiece(_p, indexRowOriginal, indexColOriginal, 3, 0, setGame);
-                                 console.log(gameNew);
-                                 if (false)
-                                 setGame(gameNew);
+                                 game.movePiece(_p, indexRowOriginal, indexColOriginal, 3, 0, setGame);
                               }}
                               key={locationCol}
                               className={classNameCol}
