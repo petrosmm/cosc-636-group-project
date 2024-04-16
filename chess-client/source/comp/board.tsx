@@ -23,6 +23,7 @@ const Board: React.FC<{}> = ({}) => {
 
    useEffect(() => {
       console.log("helo");
+      console.log(`game`, game);
    }, [game]);
 
    return (
@@ -52,6 +53,9 @@ const Board: React.FC<{}> = ({}) => {
                         return (
                            <div
                               onClick={() => {
+                                 console.log(`game`, game);
+                                 console.log(`game getboard`, game?.getBoard());
+
                                  let moves = getMoves(_p, game.getBoard(), indexRowOriginal, indexColOriginal);
                                  game.movePiece(_p, indexRowOriginal, indexColOriginal, 3, 0, setGame);
                               }}

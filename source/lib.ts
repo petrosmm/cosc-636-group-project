@@ -1,7 +1,8 @@
 import { Socket } from "socket.io";
-import { generateRandomNumber, generateRandomTextAndNumbers } from "./functions";
+import { deepCopy, generateRandomNumber, generateRandomTextAndNumbers } from "./functions";
 
 const Enumerable = require("linq");
+var _ = require("lodash");
 
 export const PORT_SERVER = 8081;
 
@@ -150,7 +151,7 @@ export class Game {
       setGame: React.Dispatch<React.SetStateAction<Game>>
    ) {
       let _piece = this.board[rowFrom][columnFrom];
-
+      console.log(`this`, this);
       if (_piece != null) {
          _piece.isFirstMove = false;
          this.board[rowTo][columnTo] = _piece;
@@ -159,8 +160,10 @@ export class Game {
          if (false) console.log(`_piece`, this.board[rowTo][columnTo]);
       }
 
+      let x = _.clone(this);
+
       setGame((prevGame: any) => {
-         return { ...this, board: this.board };
+         return x;
       });
    }
 
