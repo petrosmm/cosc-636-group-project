@@ -28,7 +28,7 @@ const Board: React.FC<{}> = ({}) => {
    return (
       <>
          <div className="col-12 pb-4">{refPieceCurrent.current != null && "has moves!"}</div>
-         <div className="col-12">
+         <div className="col-11">
             {game?.board?.length > 0 &&
                game?.board?.map((piecesAcrossRow, index) => {
                   let indexRowOriginal = index;
@@ -38,7 +38,7 @@ const Board: React.FC<{}> = ({}) => {
                      .select((_p, _index) => {
                         let indexColOriginal = _index;
                         let locationCol = _index * 2 + 2;
-                        let _display = ["cEng " + locationCol, _p?.toString()].join(" ");
+                        let _display = ["cEng " + locationCol, _p?.getColor(), "|", _p?.getType()].filter(Boolean).join(" ");
                         let classNameCol = "col ";
                         let isActualPiece = _p?.getType() != null;
 
@@ -52,6 +52,7 @@ const Board: React.FC<{}> = ({}) => {
                         let display =
                            isActualPiece && _p?.getColor() == game.turn ? (
                               <button
+                                 title={_p?.getId()}
                                  onClick={() => {
                                     setPieceCurrent([indexRowOriginal, indexColOriginal]);
 
@@ -59,7 +60,7 @@ const Board: React.FC<{}> = ({}) => {
                                     if (moves?.length > 0) {
                                        setPieceCurrentMoves(moves);
                                     } else {
-                                       if (false) setPieceCurrentMoves([]);
+                                       setPieceCurrentMoves([]);
                                        setPieceCurrent(null);
                                     }
                                  }}>
@@ -69,17 +70,17 @@ const Board: React.FC<{}> = ({}) => {
                               <button
                                  onClick={() => {
                                     if (_pieceCurrent != null) {
-                                       let moves = getMoves(game.getBoard(), _pieceCurrent[0], _pieceCurrent[1]);
-                                       console.log(
+                                       // let moves = getMoves(game.getBoard(), _pieceCurrent[0], _pieceCurrent[1]);
+
+                                       game.movePiece(
                                           _pieceCurrent[0],
                                           _pieceCurrent[1],
                                           indexRowOriginal,
                                           indexColOriginal,
                                           setGame
                                        );
-                                       if (false) {
-                                          // game.movePiece(_pieceCurrent[0], _pieceCurrent[1], indexRowOriginal,  indexColOriginal, setGame);
-                                       }
+
+                                       setPieceCurrentMoves([]);
                                     }
                                  }}
                                  className="btn-danger">

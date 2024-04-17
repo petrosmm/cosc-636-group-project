@@ -38,8 +38,8 @@ export type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 export type board = (Piece | null)[][];
 
 type Player = {
-   username: string; // Full name of the player
-   color: color; // Chess game color assigned to the player
+   username: string;
+   color: color;
 };
 
 export class Piece {
@@ -126,9 +126,13 @@ export class Game {
                   piece = new Piece("bishop", color);
                } else if (col === 8) {
                   piece = new Piece("king", color);
+
+                  // old
                   if (false) piece = row === 1 ? new Piece("queen", color) : new Piece("king", color);
                } else if (col === 10) {
                   piece = new Piece("queen", color);
+
+                  // old
                   if (false) piece = row === 1 ? new Piece("king", color) : new Piece("queen", color);
                }
             }
@@ -155,11 +159,11 @@ export class Game {
          _piece.isFirstMove = false;
          this.board[rowTo][columnTo] = _piece;
          this.board[rowFrom][columnFrom] = null;
-      }
 
-      setGame((prevGame: any) => {
-         return _.clone(this);
-      });
+         setGame((prevGame: any) => {
+            return _.clone(this);
+         });
+      }
    }
 
    private assignPlayers(username1: string, username2: string) {
