@@ -82,6 +82,14 @@ export class Game {
    public turn: color;
    public board: board = [];
 
+   // need a timer that gets passed back and forth...
+   // ischeckmate
+   // ischeck?
+
+   // castling
+   // pawn promotion
+   // en-passant
+
    public constructor(username1: string, username2: string) {
       this.fillBoard();
       this.assignPlayers(username1, username2);
