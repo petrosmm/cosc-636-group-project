@@ -37,11 +37,14 @@ const Board: React.FC<{}> = ({}) => {
 
                   let pieces = Enumerable.from(piecesAcrossRow)
                      .select((_p, _index) => {
+                        let pieceOccupant = _p;
                         let indexColOriginal = _index;
                         let locationCol = _index * 2 + 2;
-                        let _display = ["cEng " + locationCol, _p?.getColor(), "|", _p?.getType()].filter(Boolean).join(" ");
+                        let _display = ["cEng " + locationCol, pieceOccupant?.getColor(), "|", pieceOccupant?.getType()]
+                           .filter(Boolean)
+                           .join(" ");
                         let classNameCol = "col ";
-                        let isActualPiece = _p?.getType() != null;
+                        let isActualPiece = pieceOccupant?.getType() != null;
 
                         if (isActualPiece) {
                            classNameCol = "col bg-warning";
@@ -50,59 +53,61 @@ const Board: React.FC<{}> = ({}) => {
                         let moves = refPieceCurrentMoves.current;
                         let hasMoves = moves?.length > 0;
                         let _pieceCurrent = refPieceCurrent.current;
-                        let display = isActualPiece ? (
-                           <button
-                              title={_p?.getId()}
-                              onClick={() => {
-                                 setPieceCurrent([indexRowOriginal, indexColOriginal]);
+                        let movesIndex = moves.findIndex((p) => p[0] == indexRowOriginal && p[1] == indexColOriginal);
+                        let buttonMove =
+                           hasMoves && movesIndex > -1 ? (
+                              <button
+                                 onClick={() => {
+                                    if (_pieceCurrent != null) {
+                                       game.movePiece(
+                                          _pieceCurrent[0],
+                                          _pieceCurrent[1],
+                                          indexRowOriginal,
+                                          indexColOriginal,
+                                          setGame
+                                       );
 
-                                 let moves = getMoves(game.getBoard(), indexRowOriginal, indexColOriginal);
-                                 if (moves?.length > 0) {
-                                    setPieceCurrentMoves(moves);
-                                 } else {
-                                    setPieceCurrentMoves([]);
-                                    setPieceCurrent(null);
-                                 }
-                              }}>
-                              {_display}
-                           </button>
-                        ) : hasMoves && moves.findIndex((p) => p[0] == indexRowOriginal && p[1] == indexColOriginal) > -1 ? (
-                           <button
-                              onClick={() => {
-                                 if (_pieceCurrent != null) {
-                                    // let moves = getMoves(game.getBoard(), _pieceCurrent[0], _pieceCurrent[1]);
+                                       setPieceCurrentMoves([]);
+                                    }
+                                 }}
+                                 className="btn-danger">
+                                 Move here...
+                              </button>
+                           ) : null;
 
-                                    game.movePiece(
-                                       _pieceCurrent[0],
-                                       _pieceCurrent[1],
-                                       indexRowOriginal,
-                                       indexColOriginal,
-                                       setGame
-                                    );
+                        let display = (
+                           <>
+                              {isActualPiece ? (
+                                 <button
+                                    title={pieceOccupant?.getId()}
+                                    onClick={() => {
+                                       setPieceCurrent([indexRowOriginal, indexColOriginal]);
 
-                                    setPieceCurrentMoves([]);
-                                 }
-                              }}
-                              className="btn-danger">
-                              Move here...
-                           </button>
-                        ) : (
-                           _display
+                                       let moves = getMoves(game.getBoard(), indexRowOriginal, indexColOriginal);
+                                       if (moves?.length > 0) {
+                                          setPieceCurrentMoves(moves);
+                                       } else {
+                                          setPieceCurrentMoves([]);
+                                          setPieceCurrent(null);
+                                       }
+                                    }}>
+                                    {_display}
+                                 </button>
+                              ) : null}
+                              {buttonMove}
+                              {!isActualPiece && buttonMove == null ? _display : null}
+                           </>
                         );
 
-                        return (
-                           <div
-                              onClick={() => {
-                                 if (false) {
-                                 }
-                              }}
-                              key={locationCol}
-                              className={classNameCol}>
+                        let displayColumn = (
+                           <div key={locationCol} className={classNameCol}>
                               {display}
                               <br />
                               {["r: " + indexRowOriginal, "c: " + indexColOriginal].join(", ")}
                            </div>
                         );
+
+                        return displayColumn;
                      })
                      .toArray();
 
