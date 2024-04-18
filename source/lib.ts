@@ -81,6 +81,7 @@ export class Game {
    private boardInactive: Piece[] = [];
    public turn: color;
    public board: board = [];
+   public isGameOver: boolean;
 
    // need a timer that gets passed back and forth...
    // ischeckmate
@@ -94,21 +95,22 @@ export class Game {
       this.fillBoard();
       this.assignPlayers(username1, username2);
       this.turn = "white";
+      this.isGameOver = false;
    }
 
    private fillBoard() {
-      for (let row = 1; row <= 15; row += 2) {
+      for (let row = 0; row <= 7; row++) {
          let rowArray: (Piece | null)[] = [];
-         for (let col = 2; col <= 16; col += 2) {
+         for (let col = 0; col <= 7; col++) {
             let piece: Piece | null = null;
 
             // Place pawns
-            if (row === 3 || row === 13) {
+            if (row === 1 || row === 6) {
                let color: color = null!;
-               if (row === 3) {
+               if (row === 1) {
                   // Second row from the top, black pawns
                   color = "black";
-               } else if (row === 13) {
+               } else if (row === 6) {
                   // Second row from the bottom, white pawns
                   color = "white";
                }
@@ -117,27 +119,27 @@ export class Game {
             }
 
             // Place the other pieces on the first and last rows
-            if (row === 1 || row === 15) {
+            if (row === 0 || row === 7) {
                let color: color = null!;
-               if (row === 1) {
+               if (row === 0) {
                   color = "black";
                }
-               if (row === 15) {
+               if (row === 7) {
                   color = "white";
                }
 
-               if (col === 2 || col === 16) {
+               if (col === 0 || col === 7) {
                   piece = new Piece("rook", color);
-               } else if (col === 4 || col === 14) {
+               } else if (col === 1 || col === 6) {
                   piece = new Piece("knight", color);
-               } else if (col === 6 || col === 12) {
+               } else if (col === 2 || col === 5) {
                   piece = new Piece("bishop", color);
-               } else if (col === 8) {
+               } else if (col === 3) {
                   piece = new Piece("king", color);
 
                   // old
                   if (false) piece = row === 1 ? new Piece("queen", color) : new Piece("king", color);
-               } else if (col === 10) {
+               } else if (col === 4) {
                   piece = new Piece("queen", color);
 
                   // old
