@@ -291,26 +291,26 @@ export function getPawnMovesWithObstacles(
 
    // Capturing diagonally
    const captureMoves = [
-      [2, direction],
-      [-2, direction]
+      //[isBlack ? 1 : -1, direction],
+      // [isBlack ? 1 : -1, direction * direction],
+      [isBlack ? 1 : -1, isBlack ? 1 : -1],
+      [isBlack ? 1 : -1, isBlack ? -1 : 1]
    ];
 
-   captureMoves.forEach(([colChange, rowChange]) => {
-      let captureCol = column + colChange;
+   console.log(`isBlack`, isBlack);
+
+   captureMoves.forEach(([rowChange, colChange]) => {
       let captureRow = row + rowChange;
+      let captureCol = column + colChange;
 
-      // TODO make sure opposite piece
-
-      let pieceProposed = board[captureRow][captureCol];
+      let pieceProposed: Piece | null = null;
+      try {
+         pieceProposed = board[captureRow][captureCol];
+      } catch (ex) {}
 
       if (captureCol >= 0 && captureCol <= 7 && captureRow >= 0 && captureRow <= 7 && pieceProposed != null) {
-         // Check if the piece at the diagonal is of opposite color
-         // TODO make sure opposite piece
-
-         if (pieceProposed !== null) {
-            // Assuming Piece includes a color property or similar logic
-            moves.push([captureRow, captureCol]);
-         }
+         // Assuming Piece includes a color property or similar logic
+         moves.push([captureRow, captureCol]);
       }
    });
 

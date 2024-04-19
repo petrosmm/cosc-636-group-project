@@ -17,7 +17,6 @@ const Board: React.FC<{}> = ({}) => {
       let doIgnore = false;
 
       setGame(new Game("max", "virgil"));
-      console.log(`game`, new Game("max", "virgil"));
 
       return () => {
          doIgnore = true;
@@ -28,7 +27,7 @@ const Board: React.FC<{}> = ({}) => {
 
    return (
       <>
-         <div className="col-12 pb-4">{refPieceCurrent.current != null ? "has moves!" : "&nbps;"}</div>
+         <div className="col-12 pb-4">{refPieceCurrent.current != null ? <>has moves!</> : <> </>}</div>
          <div className="col-11">
             {game?.board?.length > 0 &&
                game?.board?.map((piecesAcrossRow, index) => {
