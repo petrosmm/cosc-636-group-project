@@ -1,4 +1,4 @@
-import { Piece, color, type, board } from "./lib";
+import { Piece, color, type, board, move, Game } from "./lib";
 const Enumerable = require("linq");
 
 const directionsKing = [
@@ -54,16 +54,16 @@ const directionsBishop = [
    [-2, -2]
 ];
 
-export function getMoves(board: board, row: number, col: number) {
-   let _moves: [number, number][] = [];
-   let moves: [number, number][] = [];
+export function getMoves(board: board, row: number, col: number, game: Game) {
+   let _moves: move[] = [];
+   let moves: move[] = [];
    let pieceOccupying = board[row][col];
 
    try {
       if (pieceOccupying != null) {
          switch (pieceOccupying?.getType()) {
             case "pawn": {
-               _moves = getPawnMovesWithObstacles(row, col, board, pieceOccupying);
+               _moves = getPawnMovesWithObstacles(row, col, game, pieceOccupying);
 
                break;
             }
@@ -119,12 +119,8 @@ export function getMoves(board: board, row: number, col: number) {
    return moves;
 }
 
-export function getKnightMovesWithObstacles(
-   row: number,
-   column: number,
-   board: Array<Array<Piece | null>>
-): Array<[number, number]> {
-   let moves: Array<[number, number]> = [];
+export function getKnightMovesWithObstacles(row: number, column: number, board: Array<Array<Piece | null>>): Array<move> {
+   let moves: Array<move> = [];
    let pieceMine = board[row][column];
    // All possible "L" moves for a knight
 
@@ -156,7 +152,7 @@ export function getKnightMovesWithObstacles(
          let pieceProposed = board[rowNew][columnNew];
          if (pieceProposed?.getColor() !== pieceMine?.getColor() || pieceProposed != null) {
             // Assuming knight can move to an empty square or capture an opponent's piece
-            moves.push([rowNew, columnNew]);
+            moves.push([rowNew, columnNew, null]);
          }
       }
    });
@@ -164,8 +160,8 @@ export function getKnightMovesWithObstacles(
    return moves;
 }
 
-function getKingMovesWithObstacles(column: number, row: number, board: Array<Array<Piece | null>>): Array<[number, number]> {
-   let moves: Array<[number, number]> = [];
+function getKingMovesWithObstacles(column: number, row: number, board: Array<Array<Piece | null>>): Array<move> {
+   let moves: Array<move> = [];
    // Directions the king can move (one square in any direction)
    if (false) {
       const directions = [
@@ -190,18 +186,18 @@ function getKingMovesWithObstacles(column: number, row: number, board: Array<Arr
       let pieceProposed = board[newRow][newColumn];
       // Check if there is a piece in the new position
       if (pieceProposed != null) {
-         moves.push([newRow, newColumn]); // Can capture
+         moves.push([newRow, newColumn, null]); // Can capture
          continue; // Only one move possible in each direction for the king
       }
 
-      moves.push([newRow, newColumn]);
+      moves.push([newRow, newColumn, null]);
    }
 
    return moves;
 }
 
-function getBishopMovesWithObstacles(column: number, row: number, board: Array<Array<any>>): Array<[number, number]> {
-   let moves: Array<[number, number]> = [];
+function getBishopMovesWithObstacles(column: number, row: number, board: Array<Array<any>>): Array<move> {
+   let moves: Array<move> = [];
    // Directions the bishop can move: up-right, up-left, down-right, down-left
 
    for (let [dx, dy] of directionsBishop) {
@@ -214,19 +210,19 @@ function getBishopMovesWithObstacles(column: number, row: number, board: Array<A
 
          // Check if there is a piece in the new position
          if (board[newRow][newColumn] != null) {
-            moves.push([newRow, newColumn]); // Can capture
+            moves.push([newRow, newColumn, null]); // Can capture
             break; // Stop checking further in this direction
          }
 
-         moves.push([newRow, newColumn]);
+         moves.push([newRow, newColumn, null]);
       }
    }
 
    return moves;
 }
 
-function getQueenMovesWithObstacles(column: number, row: number, board: Array<Array<Piece | null>>): Array<[number, number]> {
-   let moves: Array<[number, number]> = [];
+function getQueenMovesWithObstacles(column: number, row: number, board: Array<Array<Piece | null>>): Array<move> {
+   let moves: Array<move> = [];
    // Directions the queen can move (combines rook and bishop directions)
 
    for (let [dx, dy] of directionsQueen) {
@@ -239,11 +235,11 @@ function getQueenMovesWithObstacles(column: number, row: number, board: Array<Ar
 
          // Check if there is a piece in the new position
          if (board[newRow][newColumn] != null) {
-            moves.push([newColumn, newRow]); // Can capture
+            moves.push([newColumn, newRow, null]); // Can capture
             break; // Stop checking further in this direction
          }
 
-         moves.push([newColumn, newRow]);
+         moves.push([newColumn, newRow, null]);
       }
    }
 
@@ -258,46 +254,41 @@ export function findLocationOfPiece(board: board, piece: Piece) {
 export function getPawnMovesWithObstacles(
    row: number,
    column: number,
-   board: Array<Array<Piece | null>>,
+   // board: Array<Array<Piece | null>>,
+   game: Game,
    piece: Piece | null
-): Array<[number, number]> {
+): Array<move> {
    let isBlack = piece?.getColor() == "black";
-   let moves: Array<[number, number]> = [];
+   let moves: Array<move> = [];
    let startRow = isBlack ? 1 : 6; // Starting rows for white and black pawns
    let direction = isBlack ? 1 : -1; // Direction of movement depending on the pawn's color
 
    // Single move forward
    let newRow = row + direction;
-   if (false) console.log(`newRow`, newRow);
 
-   if (newRow >= 0 && newRow <= 7 && board[newRow][column] === null) {
-      moves.push([newRow, column]);
-      if (false)
-         if (piece?.hasDoneFirstMove()) {
-            moves.push([newRow + 1, column]);
-         }
+   if (newRow >= 0 && newRow <= 7 && game.board[newRow][column] === null) {
+      moves.push([newRow, column, null]);
 
       // Double move from starting position
       if (piece?.hasDoneFirstMove() || row === startRow) {
-         console.log(row);
+         if (false) console.log(row);
+
          let twoStepsRow = row + 2 * direction;
-         console.log(`twoStepsRow`, twoStepsRow);
-         if (twoStepsRow >= 0 && twoStepsRow <= 7 && board[twoStepsRow][column] === null) {
+
+         if (false) console.log(`twoStepsRow`, twoStepsRow);
+
+         if (twoStepsRow >= 0 && twoStepsRow <= 7 && game.board[twoStepsRow][column] === null) {
             console.log("Double move");
-            moves.push([twoStepsRow, column]);
+            moves.push([twoStepsRow, column, null]);
          }
       }
    }
 
    // Capturing diagonally
    const captureMoves = [
-      //[isBlack ? 1 : -1, direction],
-      // [isBlack ? 1 : -1, direction * direction],
       [isBlack ? 1 : -1, isBlack ? 1 : -1],
       [isBlack ? 1 : -1, isBlack ? -1 : 1]
    ];
-
-   console.log(`isBlack`, isBlack);
 
    captureMoves.forEach(([rowChange, colChange]) => {
       let captureRow = row + rowChange;
@@ -305,12 +296,53 @@ export function getPawnMovesWithObstacles(
 
       let pieceProposed: Piece | null = null;
       try {
-         pieceProposed = board[captureRow][captureCol];
+         pieceProposed = game.board[captureRow][captureCol];
       } catch (ex) {}
 
       if (captureCol >= 0 && captureCol <= 7 && captureRow >= 0 && captureRow <= 7 && pieceProposed != null) {
          // Assuming Piece includes a color property or similar logic
-         moves.push([captureRow, captureCol]);
+         moves.push([captureRow, captureCol, null]);
+      }
+   });
+
+   let pieceProposedEnPassant: Piece | null = null;
+   let pieceProposedEnPassant2: Piece | null = null;
+
+   const captureMovesEnPassant = [
+      [isBlack ? 1 : -1, -1],
+      [isBlack ? 1 : -1, 1]
+   ];
+
+   captureMovesEnPassant.forEach(([rowChange, colChange]) => {
+      let rowCapturePassant = row + rowChange;
+      let colCapturePassant = column + colChange;
+
+      let piecePassantForMove = game.getPiece(rowCapturePassant, colCapturePassant);
+
+      if (piecePassantForMove == null) {
+         if (isBlack) {
+            let pieceAdjacent = game.getPiece(rowCapturePassant - 1, colCapturePassant);
+            if (
+               pieceAdjacent != null &&
+               pieceAdjacent?.getColor() == "white" &&
+               pieceAdjacent?.getType() == "pawn" &&
+               pieceAdjacent.isFirstRecentlyTaken
+            ) {
+               moves.push([rowCapturePassant, colCapturePassant, "en-passant"]);
+               alert("En passant for black!");
+            }
+         } else {
+            let pieceAdjacent = game.getPiece(rowCapturePassant + 1, colCapturePassant);
+            if (
+               pieceAdjacent != null &&
+               pieceAdjacent?.getColor() == "black" &&
+               pieceAdjacent?.getType() == "pawn" &&
+               pieceAdjacent.isFirstRecentlyTaken
+            ) {
+               moves.push([rowCapturePassant, colCapturePassant, "en-passant"]);
+               alert("En passant for white!");
+            }
+         }
       }
    });
 

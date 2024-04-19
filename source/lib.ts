@@ -36,6 +36,7 @@ export type Message = User & {
 export type color = "white" | "black";
 export type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 export type board = (Piece | null)[][];
+export type move = [number, number, "en-passant" | null];
 
 type Player = {
    username: string;
@@ -47,12 +48,15 @@ export class Piece {
    private type?: type;
    private color?: color;
    public isFirstMove;
+   /** used for en passant oui oui */
+   public isFirstRecentlyTaken;
 
    constructor(type: type, color: color) {
       this.id = generateRandomTextAndNumbers(5);
       this.type = type;
       this.color = color;
       this.isFirstMove = true;
+      this.isFirstRecentlyTaken = false;
    }
 
    public toString() {
@@ -156,19 +160,70 @@ export class Game {
       if (false) console.log(this.board);
    }
 
+   public getPiece(row: number, column: number) {
+      let piece: Piece | null = null;
+
+      try {
+         piece = this.board[row][column];
+      } catch (ex) {}
+
+      return piece;
+   }
+
+   public consumePiece(row: number, column: number) {
+      let piece = this.getPiece(row, column);
+      if (piece != null) {
+         this.boardInactive.push(piece);
+         this.board[row][column] = null;
+      }
+   }
+
    public movePiece(
       rowFrom: number,
       columnFrom: number,
       rowTo: number,
       columnTo: number,
-      setGame: React.Dispatch<React.SetStateAction<Game>>
+      setGame: React.Dispatch<React.SetStateAction<Game>>,
+      metaData?: "en-passant" | null
    ) {
-      let _piece = this.board[rowFrom][columnFrom];
+      let _piece = this.getPiece(rowFrom, columnFrom);
 
       if (_piece != null) {
-         _piece.isFirstMove = false;
+         if (_piece.isFirstMove) {
+            _piece.isFirstMove = false;
+            _piece.isFirstRecentlyTaken = true;
+         } else {
+            _piece.isFirstMove = false;
+            _piece.isFirstRecentlyTaken = false;
+         }
+
+         let pieceToStash = this.getPiece(rowTo, columnTo);
+
+         if (pieceToStash !== null && metaData == null) {
+            this.boardInactive.push(pieceToStash);
+         }
+
          this.board[rowTo][columnTo] = _piece;
+
          this.board[rowFrom][columnFrom] = null;
+
+         if (metaData == "en-passant") {
+            let piecePotential: Piece | null = null;
+
+            let rowCalced = 0;
+
+            if (_piece?.getColor() == "white") {
+               rowCalced = rowTo + 1;
+            } else if (_piece?.getColor() == "black") {
+               rowCalced = rowTo - 1;
+            }
+
+            piecePotential = this.getPiece(rowCalced, columnTo);
+
+            if (piecePotential !== null) {
+               this.consumePiece(rowCalced, columnTo);
+            }
+         }
 
          setGame((prevGame: any) => {
             return _.clone(this);

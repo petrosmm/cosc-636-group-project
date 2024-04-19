@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import useStateRef from "react-usestateref";
 
-import { Game } from "../../../source/lib";
+import { Game, Piece, move } from "../../../source/lib";
 import Enumerable from "linq";
 import { getMoves } from "../../../source/lib-moves";
 
@@ -11,7 +11,7 @@ const Board: React.FC<{}> = ({}) => {
    const [game, setGame, refGame] = useStateRef(null as unknown as Game);
    const [test, setTest] = useState(true);
    const [pieceCurrent, setPieceCurrent, refPieceCurrent] = useStateRef(null as unknown as [number, number] | null);
-   const [pieceCurrentMoves, setPieceCurrentMoves, refPieceCurrentMoves] = useStateRef([] as unknown as [number, number][]);
+   const [pieceCurrentMoves, setPieceCurrentMoves, refPieceCurrentMoves] = useStateRef([] as unknown as move[]);
 
    useEffect(() => {
       let doIgnore = false;
@@ -28,6 +28,26 @@ const Board: React.FC<{}> = ({}) => {
    return (
       <>
          <div className="col-12 pb-4">{refPieceCurrent.current != null ? <>has moves!</> : <> </>}</div>
+         <div className="col-12 pb-4">
+            <div className="col-1">
+               <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                     console.log(game);
+                  }}>
+                  Debug board
+               </button>
+            </div>
+            <div className="col-1">
+               <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                     game.movePiece(7, 3, 5, 3, setGame);
+                  }}>
+                  Test piece
+               </button>
+            </div>
+         </div>
          <div className="col-11">
             {game?.board?.length > 0 &&
                game?.board?.map((piecesAcrossRow, index) => {
@@ -52,9 +72,10 @@ const Board: React.FC<{}> = ({}) => {
                         let moves = refPieceCurrentMoves.current;
                         let hasMoves = moves?.length > 0;
                         let _pieceCurrent = refPieceCurrent.current;
-                        let movesIndex = moves.findIndex((p) => p[0] == indexRowOriginal && p[1] == indexColOriginal);
+                        let indexOfMove = moves.findIndex((p) => p[0] == indexRowOriginal && p[1] == indexColOriginal);
+                        let move = moves[indexOfMove];
                         let buttonMove =
-                           hasMoves && movesIndex > -1 ? (
+                           hasMoves && indexOfMove > -1 ? (
                               <button
                                  onClick={() => {
                                     if (_pieceCurrent != null) {
@@ -63,7 +84,8 @@ const Board: React.FC<{}> = ({}) => {
                                           _pieceCurrent[1],
                                           indexRowOriginal,
                                           indexColOriginal,
-                                          setGame
+                                          setGame,
+                                          move[2]
                                        );
 
                                        setPieceCurrentMoves([]);
@@ -81,8 +103,7 @@ const Board: React.FC<{}> = ({}) => {
                                     title={pieceOccupant?.getId()}
                                     onClick={() => {
                                        setPieceCurrent([indexRowOriginal, indexColOriginal]);
-
-                                       let moves = getMoves(game.getBoard(), indexRowOriginal, indexColOriginal);
+                                       let moves = getMoves(game.getBoard(), indexRowOriginal, indexColOriginal, game);
                                        if (moves?.length > 0) {
                                           setPieceCurrentMoves(moves);
                                        } else {
