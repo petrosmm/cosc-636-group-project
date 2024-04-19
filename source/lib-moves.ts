@@ -3,28 +3,15 @@ const Enumerable = require("linq");
 
 const directionsKing = [
    // Horizontal and vertical
-   [-2, 0],
-   [2, 0], // Left and Right
-   [0, -1],
-   [0, 1], // Up and Down
+   [0, 1],
+   [0, -1], // Left and Right
+   [1, 0],
+   [-1, 0], // Up and Down
    // Diagonal
-   [-2, -1],
-   [-2, 1], // Diagonals left
-   [2, -1],
-   [2, 1] // Diagonals right
-];
-
-const directionsKnight2 = [
-   // Two squares along columns, one along row
-   [-4, 1],
-   [4, 1], // Upward L-moves
-   [-4, -1],
-   [4, -1], // Downward L-moves
-   // Two squares along rows, one along column
-   [-1, 4],
-   [1, 4], // Rightward L-moves
-   [-1, -4],
-   [1, -4] // Leftward L-moves
+   [-1, -1],
+   [-1, 1], // Diagonals left
+   [1, -1],
+   [1, 1] // Diagonals right
 ];
 
 const directionsQueen = [
@@ -73,7 +60,7 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             }
 
             case "knight": {
-               _moves = getKnightMovesWithObstacles(row, col, board);
+               _moves = getKnightMovesWithObstacles(row, col, board, pieceOccupying);
 
                break;
             }
@@ -87,6 +74,8 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             }
 
             case "king": {
+               _moves = getKingMovesWithObstacles(row, col, game, pieceOccupying);
+
                break;
             }
 
@@ -119,7 +108,12 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
    return moves;
 }
 
-export function getKnightMovesWithObstacles(row: number, column: number, board: Array<Array<Piece | null>>): Array<move> {
+export function getKnightMovesWithObstacles(
+   row: number,
+   column: number,
+   board: Array<Array<Piece | null>>,
+   piece: Piece | null
+): Array<move> {
    let moves: Array<move> = [];
    let pieceMine = board[row][column];
    // All possible "L" moves for a knight
@@ -160,35 +154,15 @@ export function getKnightMovesWithObstacles(row: number, column: number, board: 
    return moves;
 }
 
-function getKingMovesWithObstacles(column: number, row: number, board: Array<Array<Piece | null>>): Array<move> {
+function getKingMovesWithObstacles(row: number, column: number, game: Game, piece: Piece | null): Array<move> {
    let moves: Array<move> = [];
-   // Directions the king can move (one square in any direction)
-   if (false) {
-      const directions = [
-         [2, 0],
-         [-2, 0],
-         [0, 1],
-         [0, -1],
-         [2, 2],
-         [-2, 2],
-         [2, -2],
-         [-2, -2]
-      ];
-   }
 
    for (let [dx, dy] of directionsKing) {
-      let newColumn = column + dx;
-      let newRow = row + dy;
+      let newRow = row + dx;
+      let newColumn = column + dy;
 
       // Check if new position is out of bounds
-      if (newColumn < 2 || newColumn > 16 || newRow < 1 || newRow > 15) continue;
-
-      let pieceProposed = board[newRow][newColumn];
-      // Check if there is a piece in the new position
-      if (pieceProposed != null) {
-         moves.push([newRow, newColumn, null]); // Can capture
-         continue; // Only one move possible in each direction for the king
-      }
+      if (newColumn < 0 || newColumn > 7 || newRow < 0 || newRow > 7) continue;
 
       moves.push([newRow, newColumn, null]);
    }
@@ -304,9 +278,6 @@ export function getPawnMovesWithObstacles(
          moves.push([captureRow, captureCol, null]);
       }
    });
-
-   let pieceProposedEnPassant: Piece | null = null;
-   let pieceProposedEnPassant2: Piece | null = null;
 
    const captureMovesEnPassant = [
       [isBlack ? 1 : -1, -1],
