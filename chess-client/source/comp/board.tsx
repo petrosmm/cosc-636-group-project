@@ -42,7 +42,7 @@ const Board: React.FC<{}> = ({}) => {
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     game.movePiece(6, 3, 2, 7, setGame);
+                     game.movePiece(7, 2, 4, 3, setGame);
                   }}>
                   Test piece
                </button>

@@ -34,13 +34,6 @@ const directionsRook = [
    [-2, 0]
 ];
 
-const directionsBishop = [
-   [2, 2],
-   [-2, 2],
-   [2, -2],
-   [-2, -2]
-];
-
 export function getMoves(board: board, row: number, col: number, game: Game) {
    let _moves: move[] = [];
    let moves: move[] = [];
@@ -66,6 +59,7 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             }
 
             case "bishop": {
+               _moves = getBishopMovesWithObstacles(row, col, game);
                break;
             }
 
@@ -89,14 +83,18 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
 
    if (_moves?.length > 0) {
       _moves.forEach((p) => {
-         let pieceTarget = board[p[0]][p[1]];
-         if (pieceTarget == null) {
-            moves.push(p);
-         } else {
-            // as long as it's not one of our own
-            if (pieceOccupying?.getColor() !== pieceTarget?.getColor()) {
+         if (true) {
+            let pieceTarget = board[p[0]][p[1]];
+            if (pieceTarget == null) {
                moves.push(p);
+            } else {
+               // as long as it's not one of our own
+               if (pieceOccupying?.getColor() !== pieceTarget?.getColor()) {
+                  moves.push(p);
+               }
             }
+         } else {
+            moves.push(p);
          }
       });
    } else {
@@ -170,25 +168,82 @@ function getKingMovesWithObstacles(row: number, column: number, game: Game, piec
    return moves;
 }
 
-function getBishopMovesWithObstacles(column: number, row: number, board: Array<Array<any>>): Array<move> {
+function getBishopMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let moves: Array<move> = [];
-   // Directions the bishop can move: up-right, up-left, down-right, down-left
+   let pieceMine = game.getPiece(row, column);
+   let colorMine = pieceMine?.getColor();
+   let min = 0;
+   let max = 7;
 
-   for (let [dx, dy] of directionsBishop) {
-      for (let step = 1; step < 8; step++) {
-         let newColumn = column + dx * step;
-         let newRow = row + dy * step;
+   for (let offset = min; offset <= max; offset++) {
+      let rowNew = row - offset;
+      let colNew = column - offset;
 
-         // Check if new position is out of bounds
-         if (newColumn < 2 || newColumn > 16 || newRow < 1 || newRow > 15) break;
+      // Top-Left
+      if (colNew >= min && rowNew >= min && row != rowNew && column != colNew) {
+         let piece = game.getPiece(rowNew, colNew);
 
-         // Check if there is a piece in the new position
-         if (board[newRow][newColumn] != null) {
-            moves.push([newRow, newColumn, null]); // Can capture
-            break; // Stop checking further in this direction
+         if (game.getPiece(rowNew, colNew)?.getColor() != colorMine) {
+            moves.push([rowNew, colNew, null]);
          }
 
-         moves.push([newRow, newColumn, null]);
+         if (piece != null) {
+            break;
+         }
+      }
+   }
+
+   for (let offset = min; offset <= max; offset++) {
+      let rowNew = row - offset;
+      let colNew = column + offset;
+
+      // Top-Right
+      if (colNew <= max && rowNew >= min && row != rowNew && column != colNew) {
+         let piece = game.getPiece(rowNew, colNew);
+
+         if (game.getPiece(rowNew, colNew)?.getColor() != colorMine) {
+            moves.push([rowNew, colNew, null]);
+         }
+
+         if (piece != null) {
+            break;
+         }
+      }
+   }
+
+   for (let offset = min; offset <= max; offset++) {
+      let rowNew = row + offset;
+      let colNew = column - offset;
+
+      // Bottom-Left
+      if (colNew >= min && rowNew <= max && row != rowNew && column != colNew) {
+         let piece = game.getPiece(rowNew, colNew);
+
+         if (game.getPiece(rowNew, colNew)?.getColor() != colorMine) {
+            moves.push([rowNew, colNew, null]);
+         }
+
+         if (piece != null) {
+            break;
+         }
+      }
+   }
+
+   for (let offset = min; offset <= max; offset++) {
+      let rowNew = row + offset;
+      let colNew = column + offset;
+
+      // Bottom-Right
+      if (colNew <= max && rowNew <= max && row != rowNew && column != colNew) {
+         let piece = game.getPiece(rowNew, colNew);
+
+         if (game.getPiece(rowNew, colNew)?.getColor() != colorMine) {
+            moves.push([rowNew, colNew, null]);
+         }
+
+         if (piece != null) {
+            break;
+         }
       }
    }
 
