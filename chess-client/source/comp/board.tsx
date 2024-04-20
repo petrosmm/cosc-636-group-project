@@ -43,6 +43,19 @@ const Board: React.FC<{}> = ({}) => {
                   className="btn btn-primary"
                   onClick={() => {
                      game.movePiece(7, 2, 4, 3, setGame);
+                     game.movePiece(7, 1, 4, 4, setGame);
+                     game.movePiece(7, 5, 4, 5, setGame);
+                     game.movePiece(7, 6, 4, 6, setGame);
+                     game.movePiece(7, 4, 4, 2, setGame);
+
+                     game.movePiece(0, 2, 5, 3, setGame);
+                     game.movePiece(0, 1, 5, 4, setGame);
+
+                     game.movePiece(0, 5, 5, 6, setGame);
+                     game.movePiece(0, 6, 5, 5, setGame);
+                     game.movePiece(0, 4, 5, 2, setGame);
+
+ 
                   }}>
                   Test piece
                </button>

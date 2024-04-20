@@ -36,7 +36,7 @@ export type Message = User & {
 export type color = "white" | "black";
 export type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 export type board = (Piece | null)[][];
-export type move = [number, number, "en-passant" | null];
+export type move = [number, number, "en-passant" | "castling" | null];
 
 type Player = {
    username: string;
@@ -178,15 +178,29 @@ export class Game {
       }
    }
 
+   public swapPiece(row: number, column: number, row2: number, column2: number) {
+      let pieceOriginal = this.getPiece(row, column);
+      if (pieceOriginal != null) {
+         let pieceSwap = this.getPiece(row2, column2);
+         if (pieceSwap != null) {
+            this.board[row][column] = pieceSwap;
+            this.board[row2][column2] = pieceOriginal;
+         }
+      }
+   }
+
    public movePiece(
       rowFrom: number,
       columnFrom: number,
       rowTo: number,
       columnTo: number,
       setGame: React.Dispatch<React.SetStateAction<Game>>,
-      metaData?: "en-passant" | null
+      metaData?: move[2]
    ) {
       let _piece = this.getPiece(rowFrom, columnFrom);
+      /** current turn */
+      let isBlack = _piece?.getColor() == "black";
+      const rowHome = isBlack ? 0 : 7;
 
       if (_piece != null) {
          if (_piece.isFirstMove) {
@@ -202,10 +216,6 @@ export class Game {
          if (pieceToStash !== null && metaData == null) {
             this.boardInactive.push(pieceToStash);
          }
-
-         this.board[rowTo][columnTo] = _piece;
-
-         this.board[rowFrom][columnFrom] = null;
 
          if (metaData == "en-passant") {
             let piecePotential: Piece | null = null;
@@ -223,6 +233,14 @@ export class Game {
             if (piecePotential !== null) {
                this.consumePiece(rowCalced, columnTo);
             }
+         }
+
+         if (metaData == "castling") {
+            this.swapPiece(rowFrom, columnFrom, rowTo, columnTo);
+         } else {
+            // DEFAULT BEHAVIOUR
+            this.board[rowTo][columnTo] = _piece;
+            this.board[rowFrom][columnFrom] = null;
          }
 
          setGame((prevGame: any) => {

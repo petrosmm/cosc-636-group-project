@@ -27,13 +27,6 @@ const directionsQueen = [
    [2, 1] // Diagonals right
 ];
 
-const directionsRook = [
-   [0, 2],
-   [0, -2],
-   [2, 0],
-   [-2, 0]
-];
-
 export function getMoves(board: board, row: number, col: number, game: Game) {
    let _moves: move[] = [];
    let moves: move[] = [];
@@ -49,11 +42,13 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             }
 
             case "rook": {
+               _moves = getRookMovesWithObstacles(row, col, game);
+
                break;
             }
 
             case "knight": {
-               _moves = getKnightMovesWithObstacles(row, col, board, pieceOccupying);
+               _moves = getKnightMovesWithObstacles(row, col, game, pieceOccupying);
 
                break;
             }
@@ -84,8 +79,10 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
    if (_moves?.length > 0) {
       _moves.forEach((p) => {
          if (true) {
-            let pieceTarget = board[p[0]][p[1]];
+            let pieceTarget = game.getPiece(p[0], p[1]);
             if (pieceTarget == null) {
+               moves.push(p);
+            } else if (p[2] == "castling") {
                moves.push(p);
             } else {
                // as long as it's not one of our own
@@ -106,14 +103,110 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
    return moves;
 }
 
-export function getKnightMovesWithObstacles(
-   row: number,
-   column: number,
-   board: Array<Array<Piece | null>>,
-   piece: Piece | null
-): Array<move> {
+export function getRookMoves(row: number, column: number, game: Game): Array<move> {
+   let piece = game.getPiece(row, column);
    let moves: Array<move> = [];
-   let pieceMine = board[row][column];
+   // Horizontal moves
+   for (let c = 1; c <= 7; c++) {
+      let piecePotential = game.getPiece(row, c);
+
+      if (c != column) moves.push([row, c, null]);
+
+      if (false)
+         if (piecePotential != null) {
+            break;
+         }
+   }
+   // Vertical moves
+   for (let r = 1; r <= 7; r++) {
+      let piecePotential = game.getPiece(r, column);
+
+      if (r != row) moves.push([r, column, null]);
+
+      if (false)
+         if (piecePotential != null) {
+            break;
+         }
+   }
+   return moves;
+}
+
+function getRookMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+   let piece = game.getPiece(row, column);
+   let isBlack = piece?.getColor() == "black";
+   const rowHome = isBlack ? 0 : 7;
+   const colHomeKing = 3;
+
+   let moves: Array<move> = [];
+   // Directions the rook can move: right, left, up, down
+   const directions = [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1]
+   ];
+
+   for (let [dx, dy] of directions) {
+      for (let step = 1; step < 8; step++) {
+         let newRow = row + dx * step;
+         let newColumn = column + dy * step;
+
+         // Check if new position is out of bounds
+         if (newColumn < 0 || newColumn > 7 || newRow < 0 || newRow > 7) break;
+
+         // Check if there is a piece in the new position
+         if (game.getPiece(newRow, newColumn) != null) {
+            moves.push([newRow, newColumn, null]); // Can capture
+            break; // Stop checking further in this direction
+         }
+
+         moves.push([newRow, newColumn, null]);
+      }
+   }
+
+   if (row == rowHome && column == 0 && piece?.isFirstMove) {
+      for (let col = 1; col <= colHomeKing; col++) {
+         if (game.board[rowHome][col] == null) {
+            continue;
+         } else {
+            if (col == colHomeKing) {
+               console.log("yes");
+               let pieceKing = game.getPiece(rowHome, col);
+               if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
+                  moves.push([rowHome, col, "castling"]);
+                  alert("castling available for " + piece?.getColor() + "!");
+               }
+            }
+
+            break;
+         }
+      }
+   }
+
+   if (row == rowHome && column == 7 && piece?.isFirstMove) {
+      for (let col = column - 1; col >= colHomeKing; col--) {
+         if (game.board[rowHome][col] == null) {
+            continue;
+         } else {
+            if (col == colHomeKing) {
+               let pieceKing = game.getPiece(rowHome, col);
+               if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
+                  moves.push([rowHome, col, "castling"]);
+                  alert("castling available for " + piece?.getColor() + "!");
+               }
+            }
+
+            break;
+         }
+      }
+   }
+
+   return moves;
+}
+
+export function getKnightMovesWithObstacles(row: number, column: number, game: Game, piece: Piece | null): Array<move> {
+   let moves: Array<move> = [];
+   let pieceMine = game.getPiece(row, column);
    // All possible "L" moves for a knight
 
    const directionsKnight = [
@@ -141,7 +234,7 @@ export function getKnightMovesWithObstacles(
       // Check if new position is within bounds
       if (columnNew >= 0 && columnNew <= 7 && rowNew >= 0 && rowNew <= 7) {
          // Check if the square is occupied or not
-         let pieceProposed = board[rowNew][columnNew];
+         let pieceProposed = game.getPiece(rowNew, columnNew);
          if (pieceProposed?.getColor() !== pieceMine?.getColor() || pieceProposed != null) {
             // Assuming knight can move to an empty square or capture an opponent's piece
             moves.push([rowNew, columnNew, null]);
