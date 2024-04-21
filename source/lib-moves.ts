@@ -1,31 +1,6 @@
-import { Piece, color, type, board, move, Game } from "./lib";
+import { Piece, move, Game } from "./lib";
+import { isKingInCheck } from "./lib-temp";
 const Enumerable = require("linq");
-
-const directionsKing = [
-   // Horizontal and vertical
-   [0, 1],
-   [0, -1], // Left and Right
-   [1, 0],
-   [-1, 0], // Up and Down
-   // Diagonal
-   [-1, -1],
-   [-1, 1], // Diagonals left
-   [1, -1],
-   [1, 1] // Diagonals right
-];
-
-const directionsQueen = [
-   // Horizontal and vertical
-   [-2, 0],
-   [2, 0], // Left and Right
-   [0, -1],
-   [0, 1], // Up and Down
-   // Diagonal
-   [-2, -1],
-   [-2, 1], // Diagonals left
-   [2, -1],
-   [2, 1] // Diagonals right
-];
 
 export function getMoves(row: number, col: number, game: Game) {
    let _moves: move[] = [];
@@ -105,34 +80,6 @@ export function getMoves(row: number, col: number, game: Game) {
    return moves;
 }
 
-export function getRookMoves(row: number, column: number, game: Game): Array<move> {
-   let piece = game.getPiece(row, column);
-   let moves: Array<move> = [];
-   // Horizontal moves
-   for (let c = 1; c <= 7; c++) {
-      let piecePotential = game.getPiece(row, c);
-
-      if (c != column) moves.push([row, c, null]);
-
-      if (false)
-         if (piecePotential != null) {
-            break;
-         }
-   }
-   // Vertical moves
-   for (let r = 1; r <= 7; r++) {
-      let piecePotential = game.getPiece(r, column);
-
-      if (r != row) moves.push([r, column, null]);
-
-      if (false)
-         if (piecePotential != null) {
-            break;
-         }
-   }
-   return moves;
-}
-
 function getRookMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let piece = game.getPiece(row, column);
    let isBlack = piece?.getColor() == "black";
@@ -206,7 +153,7 @@ function getRookMovesWithObstacles(row: number, column: number, game: Game): Arr
    return moves;
 }
 
-export function getKnightMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getKnightMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let moves: Array<move> = [];
    let pieceMine = game.getPiece(row, column);
    // All possible "L" moves for a knight
@@ -249,6 +196,19 @@ export function getKnightMovesWithObstacles(row: number, column: number, game: G
 
 function getKingMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let moves: Array<move> = [];
+
+   const directionsKing = [
+      // Horizontal and vertical
+      [0, 1],
+      [0, -1], // Left and Right
+      [1, 0],
+      [-1, 0], // Up and Down
+      // Diagonal
+      [-1, -1],
+      [-1, 1], // Diagonals left
+      [1, -1],
+      [1, 1] // Diagonals right
+   ];
 
    for (let [dx, dy] of directionsKing) {
       let newRow = row + dx;
@@ -383,7 +343,7 @@ function getQueenMovesWithObstacles(row: number, column: number, game: Game): Ar
    return moves;
 }
 
-export function getPawnMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getPawnMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let piece = game.getPiece(row, column);
    let isBlack = piece?.getColor() == "black";
    let moves: Array<move> = [];

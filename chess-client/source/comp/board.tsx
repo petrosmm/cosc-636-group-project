@@ -5,6 +5,7 @@ import useStateRef from "react-usestateref";
 import { Game, move } from "../../../source/lib";
 import Enumerable from "linq";
 import { getMoves } from "../../../source/lib-moves";
+import { isKingInCheck } from "../../../source/lib-temp";
 
 const Board: React.FC<{}> = ({}) => {
    const [socket, setSocket, refSocket] = useStateRef();
@@ -132,17 +133,33 @@ const Board: React.FC<{}> = ({}) => {
                                     title={pieceOccupant?.getId()}
                                     onClick={() => {
                                        setPieceCurrent([indexRowOriginal, indexColOriginal]);
-                                       let moves = getMoves(indexRowOriginal, indexColOriginal, game);
-                                       if (moves?.length > 0) {
-                                          setPieceCurrentMoves(moves);
+                                       let pieceOccupying = game.getPiece(indexRowOriginal, indexColOriginal);
+                                       let pieceSearchKing = game.findPiece(
+                                          pieceOccupying?.getType()!,
+                                          pieceOccupying?.getColor()!
+                                       );
+                                       let king = pieceSearchKing.piece;
+                                       let rowKing = pieceSearchKing.row;
+                                       let colKing = pieceSearchKing.col;
+                                       console.log(`pieceSearchKing`, pieceSearchKing);
+                                       let isKingInCheck2 = isKingInCheck(rowKing, colKing, game, king?.getColor()!);
+                                       if (isKingInCheck2) {
+                                          alert(`King belonging to ${pieceOccupying?.getColor()} is in check!`);
                                        } else {
-                                          setPieceCurrentMoves([]);
-                                          setPieceCurrent(null);
+                                          let moves = getMoves(indexRowOriginal, indexColOriginal, game);
+                                          if (moves?.length > 0) {
+                                             setPieceCurrentMoves(moves);
+                                          } else {
+                                             setPieceCurrentMoves([]);
+                                             setPieceCurrent(null);
+                                          }
                                        }
                                     }}>
                                     {_display}
                                  </button>
-                              ) : _display}
+                              ) : (
+                                 _display
+                              )}
                               {buttonMove}
                               {!isActualPiece && buttonMove == null ? _display : null}
                            </>
