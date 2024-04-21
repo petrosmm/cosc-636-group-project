@@ -59,6 +59,7 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             }
 
             case "queen": {
+               _moves = getQueenMovesWithObstacles2(row, col, game);
                break;
             }
 
@@ -343,27 +344,70 @@ function getBishopMovesWithObstacles(row: number, column: number, game: Game): A
    return moves;
 }
 
-function getQueenMovesWithObstacles(column: number, row: number, board: Array<Array<Piece | null>>): Array<move> {
+function getQueenMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let moves: Array<move> = [];
    // Directions the queen can move (combines rook and bishop directions)
 
    for (let [dx, dy] of directionsQueen) {
       for (let step = 1; step < 8; step++) {
-         let newColumn = column + dx * step;
-         let newRow = row + dy * step;
+         let newRow = row + dx * step;
+         let newColumn = column + dy * step;
 
          // Check if new position is out of bounds
-         if (newColumn < 2 || newColumn > 16 || newRow < 1 || newRow > 15) break;
+         if (newColumn < 0 || newColumn > 7 || newRow < 0 || newRow > 7) break;
 
          // Check if there is a piece in the new position
-         if (board[newRow][newColumn] != null) {
-            moves.push([newColumn, newRow, null]); // Can capture
+         if (game.getPiece(newRow, newColumn) != null) {
+            moves.push([newRow, newColumn, null]); // Can capture
             break; // Stop checking further in this direction
          }
 
-         moves.push([newColumn, newRow, null]);
+         moves.push([newRow, newColumn, null]);
       }
    }
+
+   return moves;
+}
+
+function getQueenMovesWithObstacles2(row: number, column: number, game: Game): Array<move> {
+   let moves: Array<move> = [];
+   // Directions the queen can move: right, left, up, down, and four diagonal directions
+   const directions = [
+      // Horizontal moves (right and left)
+      [0, 1],
+      [0, -1],
+      // Vertical moves (up and down)
+      [1, 0],
+      [-1, 0],
+      // Diagonal moves
+      [1, 1],
+      [1, -1],
+      [-1, 1],
+      [-1, -1]
+   ];
+
+   directions.forEach(([dx, dy]) => {
+      let step = 1;
+
+      while (true) {
+         let newColumn = column + dx * step;
+         let newRow = row + dy * step;
+
+         // Check if the new position is out of bounds
+         if (newColumn < 0 || newColumn > 7 || newRow < 0 || newRow > 7) break;
+
+         // Check if there is a piece in the new position
+         if (game.getPiece(newRow, newColumn) != null) {
+            // Can capture an opponent's piece but stop moving further in this direction
+            moves.push([newRow, newColumn, null]);
+            break;
+         }
+
+         // Add the move as it's a valid empty space
+         moves.push([newRow, newColumn, null]);
+         step++; // Increment step to continue moving in the same direction
+      }
+   });
 
    return moves;
 }

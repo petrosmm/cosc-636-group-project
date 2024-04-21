@@ -68,6 +68,17 @@ const Board: React.FC<{}> = ({}) => {
                Test Pawn promotion
             </button>
          </div>
+
+         <div className="col pb-4">
+            <button
+               className="btn btn-primary"
+               onClick={() => {
+                  if (false) game.movePiece(6, 1, 0, 1, setGame);
+                  game.movePiece(0, 4, 3, 3, setGame);
+               }}>
+               Test Queen
+            </button>
+         </div>
          <div className="col-12">
             {game?.board?.length > 0 &&
                game?.board?.map((piecesAcrossRow, index) => {
