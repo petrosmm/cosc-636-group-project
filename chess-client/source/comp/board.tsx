@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import useStateRef from "react-usestateref";
 
-import { Game, Piece, move } from "../../../source/lib";
+import { Game, move } from "../../../source/lib";
 import Enumerable from "linq";
 import { getMoves } from "../../../source/lib-moves";
 
@@ -12,6 +12,7 @@ const Board: React.FC<{}> = ({}) => {
    const [test, setTest] = useState(true);
    const [pieceCurrent, setPieceCurrent, refPieceCurrent] = useStateRef(null as unknown as [number, number] | null);
    const [pieceCurrentMoves, setPieceCurrentMoves, refPieceCurrentMoves] = useStateRef([] as unknown as move[]);
+   const [isInPawnPromotion, setIsInPawnPromotion] = useState(false);
 
    useEffect(() => {
       let doIgnore = false;
@@ -28,40 +29,46 @@ const Board: React.FC<{}> = ({}) => {
    return (
       <>
          <div className="col-12 pb-4">{refPieceCurrent.current != null ? <>has moves!</> : <> </>}</div>
-         <div className="col-12 pb-4">
-            <div className="col-1">
-               <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                     console.log(game);
-                  }}>
-                  Debug board
-               </button>
-            </div>
-            <div className="col-1">
-               <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                     game.movePiece(7, 2, 4, 3, setGame);
-                     game.movePiece(7, 1, 4, 4, setGame);
-                     game.movePiece(7, 5, 4, 5, setGame);
-                     game.movePiece(7, 6, 4, 6, setGame);
-                     game.movePiece(7, 4, 4, 2, setGame);
-
-                     game.movePiece(0, 2, 5, 3, setGame);
-                     game.movePiece(0, 1, 5, 4, setGame);
-
-                     game.movePiece(0, 5, 5, 6, setGame);
-                     game.movePiece(0, 6, 5, 5, setGame);
-                     game.movePiece(0, 4, 5, 2, setGame);
-
- 
-                  }}>
-                  Test piece
-               </button>
-            </div>
+         <div className="col pb-4">
+            <button
+               className="btn btn-primary"
+               onClick={() => {
+                  console.log(game);
+               }}>
+               Debug board
+            </button>
          </div>
-         <div className="col-11">
+         <div className="col pb-4">
+            <button
+               className="btn btn-primary"
+               onClick={() => {
+                  game.movePiece(7, 2, 4, 3, setGame);
+                  game.movePiece(7, 1, 4, 4, setGame);
+                  game.movePiece(7, 5, 4, 5, setGame);
+                  game.movePiece(7, 6, 4, 6, setGame);
+                  game.movePiece(7, 4, 4, 2, setGame);
+
+                  game.movePiece(0, 2, 5, 3, setGame);
+                  game.movePiece(0, 1, 5, 4, setGame);
+
+                  game.movePiece(0, 5, 5, 6, setGame);
+                  game.movePiece(0, 6, 5, 5, setGame);
+                  game.movePiece(0, 4, 5, 2, setGame);
+               }}>
+               Test general
+            </button>
+         </div>
+         <div className="col pb-4">
+            <button
+               className="btn btn-primary"
+               onClick={() => {
+                  if (false) game.movePiece(6, 1, 0, 1, setGame);
+                  game.movePiece(1, 6, 7, 1, setGame);
+               }}>
+               Test Pawn promotion
+            </button>
+         </div>
+         <div className="col-12">
             {game?.board?.length > 0 &&
                game?.board?.map((piecesAcrossRow, index) => {
                   let indexRowOriginal = index;

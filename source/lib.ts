@@ -1,8 +1,9 @@
 import { Socket } from "socket.io";
 import { generateRandomNumber, generateRandomTextAndNumbers } from "./functions";
 import _ from "lodash";
+import * as Enumerable from "linq";
 
-const Enumerable = require("linq");
+//const Enumerable = require("linq");
 
 export const PORT_SERVER = 8081;
 
@@ -34,6 +35,7 @@ export type Message = User & {
 };
 
 export type color = "white" | "black";
+export type status = "pawnpromotion" | "checkmate" | "check" | null;
 export type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 export type board = (Piece | null)[][];
 export type move = [number, number, "en-passant" | "castling" | null];
@@ -86,6 +88,7 @@ export class Game {
    public turn: color;
    public board: board = [];
    public isGameOver: boolean;
+   public status: status = null;
 
    // need a timer that gets passed back and forth...
    // ischeckmate
@@ -200,7 +203,6 @@ export class Game {
       let _piece = this.getPiece(rowFrom, columnFrom);
       /** current turn */
       let isBlack = _piece?.getColor() == "black";
-      const rowHome = isBlack ? 0 : 7;
 
       if (_piece != null) {
          if (_piece.isFirstMove) {
@@ -243,10 +245,49 @@ export class Game {
             this.board[rowFrom][columnFrom] = null;
          }
 
-         setGame((prevGame: any) => {
-            return _.clone(this);
-         });
+         // pawn promotion magic
+         if (
+            (_piece?.getType() == "pawn" && [0, 7].includes(rowTo) && _piece?.getColor() == "white" && rowTo == 0) ||
+            (_piece?.getColor() == "black" && rowTo == 7)
+         ) {
+            let pieces = Enumerable.from(this.boardInactive).where((p: Piece) => p.getColor() == _piece?.getColor());
+
+            let piecesSelected = pieces.select((p) => `${p.getId()} @ ${p.getType()} (${p.getColor()})`).toArray();
+
+            let piece: Piece | undefined | null;
+            do {
+               let result = prompt(
+                  `You are up for pawn promotion and here are available pieces to resurrect: ${piecesSelected.join(", ")}`,
+                  pieces.firstOrDefault()?.getId()
+               );
+
+               piece = this.boardInactive.find((p) => p.getId() == result);
+            } while (piecesSelected?.length > 0 && piece == undefined);
+
+            if (piece && piece?.getId()?.length > 0) {
+               this.boardInactive.push(_piece);
+               this.board[rowTo][columnTo] = piece;
+               console.log("pawn promoted!");
+            }
+
+            this.updateBoard(setGame, this);
+            return;
+         }
+
+         this.updateBoard(setGame, this);
       }
+   }
+
+   private updateBoard(setGame: React.Dispatch<React.SetStateAction<Game>>, game: Game) {
+      if (game.turn == "white") {
+         game.turn = "black";
+      } else {
+         game.turn = "white";
+      }
+
+      setGame((prevGame: any) => {
+         return _.clone(game);
+      });
    }
 
    private assignPlayers(username1: string, username2: string) {
