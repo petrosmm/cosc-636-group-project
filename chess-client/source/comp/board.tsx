@@ -5,7 +5,7 @@ import useStateRef from "react-usestateref";
 import { Game, move } from "../../../source/lib";
 import Enumerable from "linq";
 import { getMoves } from "../../../source/lib-moves";
-import { isKingInCheck } from "../../../source/lib-temp";
+import { isKingInCheck, isKingInCheckmate } from "../../../source/lib-temp";
 
 const Board: React.FC<{}> = ({}) => {
    const [socket, setSocket, refSocket] = useStateRef();
@@ -132,20 +132,31 @@ const Board: React.FC<{}> = ({}) => {
                                  <button
                                     title={pieceOccupant?.getId()}
                                     onClick={() => {
+                                       let canGetMoves = true;
                                        setPieceCurrent([indexRowOriginal, indexColOriginal]);
                                        let pieceOccupying = game.getPiece(indexRowOriginal, indexColOriginal);
                                        let pieceSearchKing = game.findPiece(
                                           pieceOccupying?.getType()!,
                                           pieceOccupying?.getColor()!
                                        );
+
                                        let king = pieceSearchKing.piece;
                                        let rowKing = pieceSearchKing.row;
                                        let colKing = pieceSearchKing.col;
                                        console.log(`pieceSearchKing`, pieceSearchKing);
-                                       let isKingInCheck2 = isKingInCheck(rowKing, colKing, game, king?.getColor()!);
-                                       if (isKingInCheck2) {
+                                       let isKingCheckmate = isKingInCheckmate(rowKing, colKing, game);
+                                       let isKingCheck = isKingInCheck(rowKing, colKing, game, king?.getColor()!);
+                                       if (isKingCheck) {
                                           alert(`King belonging to ${pieceOccupying?.getColor()} is in check!`);
-                                       } else {
+                                          canGetMoves = false;
+                                       }
+
+                                       if (isKingCheckmate) {
+                                          alert(`King belonging to ${pieceOccupying?.getColor()} is in checkmate!`);
+                                          canGetMoves = true;
+                                       }
+
+                                       if (canGetMoves) {
                                           let moves = getMoves(indexRowOriginal, indexColOriginal, game);
                                           if (moves?.length > 0) {
                                              setPieceCurrentMoves(moves);

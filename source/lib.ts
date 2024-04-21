@@ -104,8 +104,8 @@ export class Game {
 
    private fillBoard() {
       if (false) fillBoardStandard(this);
-      if (false) fillBoardCheck(this);
-      fillBoardCheckmate(this);
+      fillBoardCheck(this);
+      if (false) fillBoardCheckmate(this);
    }
 
    public getPiece(row: number, column: number) {

@@ -1,21 +1,63 @@
-import { Game, Piece, type color } from "./lib";
+import { Game, Piece, move, type color } from "./lib";
 import { getMoves } from "./lib-moves";
 
 export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, color: color): boolean {
+   let movesMine: move[] = [];
+   let movesOpposition: move[] = [];
+   let movesMineKing: move[] = [];
+
    // Loop through all board squares
    for (let row = 0; row <= 7; row++) {
       for (let col = 0; col <= 7; col++) {
          const piece = game.getPiece(row, col);
 
          // piece.getColor() !== "white"
-     console.log(piece?.getColor() != color);
-         if (piece !== null && piece?.getColor() != color) {
-            const moves = getMoves(row, col, game);
-
-            if (moves.some(([destRow, destCol]) => destRow === kingRow && destCol === kingColumn)) {
-               return true;
-               break;
+         if (piece !== null) {
+            if (piece?.getType() == "king" && piece?.getColor() == color) {
+               const moves = getMoves(row, col, game);
+               if (moves?.length > 0) {
+                  movesMineKing = movesMineKing.concat(moves);
+               }
             }
+
+            if (piece?.getType() != "king" && piece?.getColor() == color) {
+               const moves = getMoves(row, col, game);
+               if (moves?.length > 0) {
+                  movesMine = movesMine.concat(moves);
+               }
+            }
+
+            if (piece?.getColor() != color) {
+               const moves = getMoves(row, col, game);
+               if (moves?.length > 0) {
+                  movesOpposition = movesOpposition.concat(moves);
+               }
+            }
+
+            for (let [row, col] of movesOpposition) {
+               let hasCoverPiece = movesMine.some((p) => p[0] == row && p[1] == col);
+               if (hasCoverPiece) {
+                  movesOpposition = movesOpposition.filter((p) => p[0] != row && p[1] != col);
+               }
+            }
+
+            for (let [row, col] of movesOpposition) {
+               movesMineKing = movesMineKing.filter((p) => p[0] != row && p[1] != col);
+            }
+
+            console.log(`movesMine`, movesMine);
+            console.log(`movesMineKing`, movesMineKing);
+            console.log(`movesOpposition`, movesOpposition);
+
+            if (movesMineKing?.length > 0) {
+               return false;
+            } else {
+               return true;
+            }
+
+            // if (moves.some(([destRow, destCol]) => destRow === kingRow && destCol === kingColumn)) {
+            //    return true;
+            // }
          }
       }
    }
@@ -25,9 +67,10 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
 
 export function isKingInCheckmate(kingColumn: number, kingRow: number, game: Game): boolean {
    let color = game.getPiece(kingColumn, kingRow)?.getColor();
-   if (!isKingInCheck(kingRow, kingColumn, game, color!)) {
-      return false;
-   }
+   if (false)
+      if (!isKingInCheck(kingRow, kingColumn, game, color!)) {
+         return false;
+      }
 
    // check all possible moves for the king to see if he can escape check
    const directions = [
@@ -44,7 +87,7 @@ export function isKingInCheckmate(kingColumn: number, kingRow: number, game: Gam
       const rowNew = kingRow + dx;
       const colNew = kingColumn + dy;
       if (rowNew >= 0 && rowNew <= 7 && colNew >= 0 && colNew <= 7) {
-         if (game.board[rowNew][colNew] === null || game.board[rowNew][colNew]?.getColor() !== "white") {
+         if (game.board[rowNew][colNew] === null || game.board[rowNew][colNew]?.getColor() !== color) {
             // temporarily move king and check if still in check
             const tempPiece = game.board[rowNew][colNew];
             // move king to new position
@@ -164,10 +207,19 @@ export function fillBoardCheck(game: Game) {
          let piece: Piece | null = null;
 
          if (row == 0 && col == 0) {
+            if (false) piece = new Piece("rook", "black");
+            piece = new Piece("queen", "black");
+         }
+
+         if (row == 1 && col == 0) {
             piece = new Piece("rook", "black");
          }
 
-         if (row == 0 && col == 7) {
+         if (row == 2 && col == 0) {
+            piece = new Piece("king", "black");
+         }
+
+         if (row == 3 && col == 7) {
             piece = new Piece("king", "white");
          }
 
