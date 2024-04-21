@@ -267,7 +267,7 @@ export class Game {
             if (piece && piece?.getId()?.length > 0) {
                this.boardInactive.push(_piece);
                this.board[rowTo][columnTo] = piece;
-               console.log("pawn promoted!");
+               alert("pawn promoted!");
             }
 
             this.updateBoard(setGame, this);
