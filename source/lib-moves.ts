@@ -27,16 +27,16 @@ const directionsQueen = [
    [2, 1] // Diagonals right
 ];
 
-export function getMoves(board: board, row: number, col: number, game: Game) {
+export function getMoves(row: number, col: number, game: Game) {
    let _moves: move[] = [];
    let moves: move[] = [];
-   let pieceOccupying = board[row][col];
+   let pieceOccupying = game.getPiece(row, col);
 
    try {
       if (pieceOccupying != null) {
          switch (pieceOccupying?.getType()) {
             case "pawn": {
-               _moves = getPawnMovesWithObstacles(row, col, game, pieceOccupying);
+               _moves = getPawnMovesWithObstacles(row, col, game);
 
                break;
             }
@@ -48,7 +48,7 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             }
 
             case "knight": {
-               _moves = getKnightMovesWithObstacles(row, col, game, pieceOccupying);
+               _moves = getKnightMovesWithObstacles(row, col, game);
 
                break;
             }
@@ -59,12 +59,12 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             }
 
             case "queen": {
-               _moves = getQueenMovesWithObstacles2(row, col, game);
+               _moves = getQueenMovesWithObstacles(row, col, game);
                break;
             }
 
             case "king": {
-               _moves = getKingMovesWithObstacles(row, col, game, pieceOccupying);
+               _moves = getKingMovesWithObstacles(row, col, game);
 
                break;
             }
@@ -84,6 +84,7 @@ export function getMoves(board: board, row: number, col: number, game: Game) {
             if (pieceTarget == null) {
                moves.push(p);
             } else if (p[2] == "castling") {
+               // exception
                moves.push(p);
             } else {
                // as long as it's not one of our own
@@ -205,7 +206,7 @@ function getRookMovesWithObstacles(row: number, column: number, game: Game): Arr
    return moves;
 }
 
-export function getKnightMovesWithObstacles(row: number, column: number, game: Game, piece: Piece | null): Array<move> {
+export function getKnightMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let moves: Array<move> = [];
    let pieceMine = game.getPiece(row, column);
    // All possible "L" moves for a knight
@@ -246,14 +247,13 @@ export function getKnightMovesWithObstacles(row: number, column: number, game: G
    return moves;
 }
 
-function getKingMovesWithObstacles(row: number, column: number, game: Game, piece: Piece | null): Array<move> {
+function getKingMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let moves: Array<move> = [];
 
    for (let [dx, dy] of directionsKing) {
       let newRow = row + dx;
       let newColumn = column + dy;
 
-      // Check if new position is out of bounds
       if (newColumn < 0 || newColumn > 7 || newRow < 0 || newRow > 7) continue;
 
       moves.push([newRow, newColumn, null]);
@@ -273,7 +273,7 @@ function getBishopMovesWithObstacles(row: number, column: number, game: Game): A
       let rowNew = row - offset;
       let colNew = column - offset;
 
-      // Top-Left
+      // top-left
       if (colNew >= min && rowNew >= min && row != rowNew && column != colNew) {
          let piece = game.getPiece(rowNew, colNew);
 
@@ -291,7 +291,7 @@ function getBishopMovesWithObstacles(row: number, column: number, game: Game): A
       let rowNew = row - offset;
       let colNew = column + offset;
 
-      // Top-Right
+      // top right
       if (colNew <= max && rowNew >= min && row != rowNew && column != colNew) {
          let piece = game.getPiece(rowNew, colNew);
 
@@ -346,40 +346,15 @@ function getBishopMovesWithObstacles(row: number, column: number, game: Game): A
 
 function getQueenMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
    let moves: Array<move> = [];
-   // Directions the queen can move (combines rook and bishop directions)
 
-   for (let [dx, dy] of directionsQueen) {
-      for (let step = 1; step < 8; step++) {
-         let newRow = row + dx * step;
-         let newColumn = column + dy * step;
-
-         // Check if new position is out of bounds
-         if (newColumn < 0 || newColumn > 7 || newRow < 0 || newRow > 7) break;
-
-         // Check if there is a piece in the new position
-         if (game.getPiece(newRow, newColumn) != null) {
-            moves.push([newRow, newColumn, null]); // Can capture
-            break; // Stop checking further in this direction
-         }
-
-         moves.push([newRow, newColumn, null]);
-      }
-   }
-
-   return moves;
-}
-
-function getQueenMovesWithObstacles2(row: number, column: number, game: Game): Array<move> {
-   let moves: Array<move> = [];
-   // Directions the queen can move: right, left, up, down, and four diagonal directions
    const directions = [
-      // Horizontal moves (right and left)
+      // horizontal
       [0, 1],
       [0, -1],
-      // Vertical moves (up and down)
+      // vertical
       [1, 0],
       [-1, 0],
-      // Diagonal moves
+      // diagonal
       [1, 1],
       [1, -1],
       [-1, 1],
@@ -393,49 +368,34 @@ function getQueenMovesWithObstacles2(row: number, column: number, game: Game): A
          let newColumn = column + dx * step;
          let newRow = row + dy * step;
 
-         // Check if the new position is out of bounds
          if (newColumn < 0 || newColumn > 7 || newRow < 0 || newRow > 7) break;
 
-         // Check if there is a piece in the new position
          if (game.getPiece(newRow, newColumn) != null) {
-            // Can capture an opponent's piece but stop moving further in this direction
             moves.push([newRow, newColumn, null]);
             break;
          }
 
-         // Add the move as it's a valid empty space
          moves.push([newRow, newColumn, null]);
-         step++; // Increment step to continue moving in the same direction
+         step++;
       }
    });
 
    return moves;
 }
 
-export function findLocationOfPiece(board: board, piece: Piece) {
-   let id = piece.getId();
-   return Enumerable.from(board).firstOrDefault((p: Piece | null) => p);
-}
-
-export function getPawnMovesWithObstacles(
-   row: number,
-   column: number,
-   // board: Array<Array<Piece | null>>,
-   game: Game,
-   piece: Piece | null
-): Array<move> {
+export function getPawnMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+   let piece = game.getPiece(row, column);
    let isBlack = piece?.getColor() == "black";
    let moves: Array<move> = [];
-   let startRow = isBlack ? 1 : 6; // Starting rows for white and black pawns
-   let direction = isBlack ? 1 : -1; // Direction of movement depending on the pawn's color
+   let startRow = isBlack ? 1 : 6;
+   let direction = isBlack ? 1 : -1;
 
-   // Single move forward
    let newRow = row + direction;
 
    if (newRow >= 0 && newRow <= 7 && game.board[newRow][column] === null) {
       moves.push([newRow, column, null]);
 
-      // Double move from starting position
+      // double move
       if (piece?.hasDoneFirstMove() || row === startRow) {
          if (false) console.log(row);
 
@@ -466,7 +426,6 @@ export function getPawnMovesWithObstacles(
       } catch (ex) {}
 
       if (captureCol >= 0 && captureCol <= 7 && captureRow >= 0 && captureRow <= 7 && pieceProposed != null) {
-         // Assuming Piece includes a color property or similar logic
          moves.push([captureRow, captureCol, null]);
       }
    });

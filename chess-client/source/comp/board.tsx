@@ -9,10 +9,8 @@ import { getMoves } from "../../../source/lib-moves";
 const Board: React.FC<{}> = ({}) => {
    const [socket, setSocket, refSocket] = useStateRef();
    const [game, setGame, refGame] = useStateRef(null as unknown as Game);
-   const [test, setTest] = useState(true);
    const [pieceCurrent, setPieceCurrent, refPieceCurrent] = useStateRef(null as unknown as [number, number] | null);
    const [pieceCurrentMoves, setPieceCurrentMoves, refPieceCurrentMoves] = useStateRef([] as unknown as move[]);
-   const [isInPawnPromotion, setIsInPawnPromotion] = useState(false);
 
    useEffect(() => {
       let doIgnore = false;
@@ -129,12 +127,12 @@ const Board: React.FC<{}> = ({}) => {
 
                         let display = (
                            <>
-                              {isActualPiece ? (
+                              {isActualPiece && pieceOccupant?.getColor() == game.turn ? (
                                  <button
                                     title={pieceOccupant?.getId()}
                                     onClick={() => {
                                        setPieceCurrent([indexRowOriginal, indexColOriginal]);
-                                       let moves = getMoves(game.getBoard(), indexRowOriginal, indexColOriginal, game);
+                                       let moves = getMoves(indexRowOriginal, indexColOriginal, game);
                                        if (moves?.length > 0) {
                                           setPieceCurrentMoves(moves);
                                        } else {
@@ -144,7 +142,7 @@ const Board: React.FC<{}> = ({}) => {
                                     }}>
                                     {_display}
                                  </button>
-                              ) : null}
+                              ) : _display}
                               {buttonMove}
                               {!isActualPiece && buttonMove == null ? _display : null}
                            </>
