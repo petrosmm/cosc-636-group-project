@@ -1,5 +1,4 @@
 import { Piece, move, Game } from "./lib";
-import { isKingInCheck } from "./lib-temp";
 const Enumerable = require("linq");
 
 export function getMoves(row: number, col: number, game: Game) {

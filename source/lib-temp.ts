@@ -2,6 +2,29 @@ import { Game, Piece, move, type color } from "./lib";
 import { getMoves } from "./lib-moves";
 
 export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, color: color): boolean {
+   let board = game.board;
+   // Loop through all board squares
+   for (let row = 0; row <= 7; row += 1) {
+      for (let col = 0; col <= 7; col += 1) {
+         const piece = board[row][col];
+         if (piece !== null && piece?.getColor() !== color) {
+            // Check enemy pieces
+            // Get moves for each piece type
+            const moves = getMoves(row, col, game);
+            // Check if any move can attack the king's position
+            if (moves.some(([destRow, destCol]) => destCol === kingColumn && destRow === kingRow)) {
+               return true; // King is in check if any move can capture the king
+            }
+         }
+      }
+   }
+   return false; // No piece is threatening the king
+}
+
+export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Game, color: color): boolean {
+   if (!isKingInCheck(kingRow, kingColumn, game, color)) {
+      return false; // Not in checkmate if not currently in check
+   }
    let movesMine: move[] = [];
    let movesOpposition: move[] = [];
    let movesMineKing: move[] = [];
@@ -65,52 +88,6 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
    return false;
 }
 
-export function isKingInCheckmate(kingColumn: number, kingRow: number, game: Game): boolean {
-   let color = game.getPiece(kingColumn, kingRow)?.getColor();
-   if (false)
-      if (!isKingInCheck(kingRow, kingColumn, game, color!)) {
-         return false;
-      }
-
-   // check all possible moves for the king to see if he can escape check
-   const directions = [
-      [0, 2],
-      [0, -2],
-      [2, 0],
-      [-2, 0],
-      [2, 2],
-      [2, -2],
-      [-2, 2],
-      [-2, -2] // all possible king moves
-   ];
-   for (let [dx, dy] of directions) {
-      const rowNew = kingRow + dx;
-      const colNew = kingColumn + dy;
-      if (rowNew >= 0 && rowNew <= 7 && colNew >= 0 && colNew <= 7) {
-         if (game.board[rowNew][colNew] === null || game.board[rowNew][colNew]?.getColor() !== color) {
-            // temporarily move king and check if still in check
-            const tempPiece = game.board[rowNew][colNew];
-            // move king to new position
-            game.board[rowNew][colNew] = game.board[kingRow][kingColumn];
-            game.board[kingRow][kingColumn] = null;
-
-            if (!isKingInCheck(colNew, rowNew, game, color!)) {
-               // If not in check in new position
-               game.board[kingRow][kingColumn] = game.board[rowNew][colNew]; // Move king back
-               game.board[rowNew][colNew] = tempPiece;
-
-               return false; // Not checkmate since the king can escape
-            }
-
-            game.board[kingRow][kingColumn] = game.board[rowNew][colNew]; // Move king back
-            game.board[rowNew][colNew] = tempPiece;
-         }
-      }
-   }
-
-   return true; // no valid moves left, king is in checkmate
-}
-
 export function fillBoardStandard(game: Game) {
    for (let row = 0; row <= 7; row++) {
       let rowArray: (Piece | null)[] = [];
@@ -169,7 +146,7 @@ export function fillBoardStandard(game: Game) {
    if (false) console.log(game.board);
 }
 
-export function fillBoardCheckmate(game: Game) {
+export function fillBoardCheck(game: Game) {
    game.turn = "black";
 
    for (let row = 0; row <= 7; row++) {
@@ -198,7 +175,7 @@ export function fillBoardCheckmate(game: Game) {
    console.log(game);
 }
 
-export function fillBoardCheck(game: Game) {
+export function fillBoardCheckmate(game: Game) {
    game.turn = "black";
 
    for (let row = 0; row <= 7; row++) {
@@ -219,7 +196,7 @@ export function fillBoardCheck(game: Game) {
             piece = new Piece("king", "black");
          }
 
-         if (row == 3 && col == 7) {
+         if (row == 1 && col == 7) {
             piece = new Piece("king", "white");
          }
 
