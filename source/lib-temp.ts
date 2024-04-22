@@ -1,7 +1,9 @@
+import Enumerable from "linq";
 import { Game, Piece, move, type color } from "./lib";
 import { getMoves } from "./lib-moves";
 
 export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, color: color): boolean {
+   let pieceKing = game.board[kingRow][kingColumn];
    let board = game.board;
    // Loop through all board squares
    for (let row = 0; row <= 7; row += 1) {
@@ -13,6 +15,7 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
             const moves = getMoves(row, col, game);
             // Check if any move can attack the king's position
             if (moves.some(([destRow, destCol]) => destCol === kingColumn && destRow === kingRow)) {
+               alert(`King belonging to ${pieceKing?.getColor()} is in check!`);
                return true; // King is in check if any move can capture the king
             }
          }
@@ -22,9 +25,11 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
 }
 
 export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Game, color: color): boolean {
+   console.log(`color`, color);
    if (!isKingInCheck(kingRow, kingColumn, game, color)) {
       return false; // Not in checkmate if not currently in check
    }
+
    let movesMine: move[] = [];
    let movesOpposition: move[] = [];
    let movesMineKing: move[] = [];
@@ -34,10 +39,10 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
       for (let col = 0; col <= 7; col++) {
          const piece = game.getPiece(row, col);
 
-         // piece.getColor() !== "white"
          if (piece !== null) {
             if (piece?.getType() == "king" && piece?.getColor() == color) {
                const moves = getMoves(row, col, game);
+               console.log(`kling movess`, moves);
                if (moves?.length > 0) {
                   movesMineKing = movesMineKing.concat(moves);
                }
@@ -56,36 +61,35 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
                   movesOpposition = movesOpposition.concat(moves);
                }
             }
-
-            for (let [row, col] of movesOpposition) {
-               let hasCoverPiece = movesMine.some((p) => p[0] == row && p[1] == col);
-               if (hasCoverPiece) {
-                  movesOpposition = movesOpposition.filter((p) => p[0] != row && p[1] != col);
-               }
-            }
-
-            for (let [row, col] of movesOpposition) {
-               movesMineKing = movesMineKing.filter((p) => p[0] != row && p[1] != col);
-            }
-
-            console.log(`movesMine`, movesMine);
-            console.log(`movesMineKing`, movesMineKing);
-            console.log(`movesOpposition`, movesOpposition);
-
-            if (movesMineKing?.length > 0) {
-               return false;
-            } else {
-               return true;
-            }
-
-            // if (moves.some(([destRow, destCol]) => destRow === kingRow && destCol === kingColumn)) {
-            //    return true;
-            // }
          }
       }
    }
 
-   return false;
+   for (let [_row, _col] of movesOpposition) {
+      let hasCoverPiece = movesMine.some((p) => p[0] == _row && p[1] == _col);
+      if (hasCoverPiece) {
+         movesOpposition = Enumerable.from(movesOpposition)
+            .where((p) => `${p[0]}-${p[1]}` != `${_row}-${_col}`)
+            .toArray();
+      }
+   }
+
+   console.log(`movesOpposition`, movesOpposition);
+
+   for (let [__row, __col] of movesOpposition) {
+      movesMineKing = Enumerable.from(movesMineKing)
+         .where((p) => `${p[0]}-${p[1]}` != `${__row}-${__col}`)
+         .toArray();
+   }
+
+   console.log(`movesMine`, movesMine);
+   console.log(`movesMineKing`, movesMineKing);
+
+   if (movesMineKing?.length > 0) {
+      return false;
+   } else {
+      return true;
+   }
 }
 
 export function fillBoardStandard(game: Game) {
@@ -199,6 +203,44 @@ export function fillBoardCheckmate(game: Game) {
          if (row == 1 && col == 7) {
             piece = new Piece("king", "white");
          }
+
+         rowArray.push(piece);
+      }
+
+      game.board.push(rowArray);
+   }
+
+   console.log(game);
+}
+
+export function fillBoardCheckmateAlt(game: Game) {
+   game.turn = "white";
+
+   for (let row = 0; row <= 7; row++) {
+      let rowArray: (Piece | null)[] = [];
+      for (let col = 0; col <= 7; col++) {
+         let piece: Piece | null = null;
+
+         if (row == 0 && col == 0) {
+            piece = new Piece("queen", "black");
+         }
+
+         if (row == 1 && col == 0) {
+            piece = new Piece("rook", "black");
+         }
+
+         if (row == 2 && col == 0) {
+            piece = new Piece("king", "black");
+         }
+         let rowMagic = 0;
+         if (row == rowMagic && col == 7) {
+            piece = new Piece("king", "white");
+         }
+
+         if (false)
+            if (row == 1 && col == 6) {
+               piece = new Piece("pawn", "white");
+            }
 
          rowArray.push(piece);
       }

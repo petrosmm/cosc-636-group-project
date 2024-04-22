@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { generateRandomNumber, generateRandomTextAndNumbers } from "./functions";
 import _ from "lodash";
 import * as Enumerable from "linq";
-import { fillBoardCheck, fillBoardCheckmate, fillBoardStandard } from "./lib-temp";
+import { fillBoardCheck, fillBoardCheckmate, fillBoardCheckmateAlt, fillBoardStandard } from "./lib-temp";
 
 //const Enumerable = require("linq");
 
@@ -105,7 +105,8 @@ export class Game {
    private fillBoard() {
       if (false) fillBoardStandard(this);
       if (false) fillBoardCheck(this);
-      if (true) fillBoardCheckmate(this);
+      if (false) fillBoardCheckmate(this);
+      if (true) fillBoardCheckmateAlt(this);
    }
 
    public getPiece(row: number, column: number) {

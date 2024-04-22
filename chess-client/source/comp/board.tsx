@@ -144,22 +144,17 @@ const Board: React.FC<{}> = ({}) => {
                                        let rowKing = pieceSearchKing.row;
                                        let colKing = pieceSearchKing.col;
                                        console.log(`pieceSearchKing`, pieceSearchKing);
-                                       let isKingCheck = isKingInCheck(rowKing, colKing, game, king?.getColor()!);
-                                       if (isKingCheck) {
-                                          alert(`King belonging to ${pieceOccupying?.getColor()} is in check!`);
-                                          canGetMoves = true;
-                                       }
+
                                        let isKingCheckmate = false;
+
                                        try {
                                           isKingCheckmate = isKingInCheckmate(rowKing, colKing, game, king?.getColor()!);
-                                       } catch (ex) {
-                                          console.error(ex);
-                                       }
-                                       if (false) {
                                           if (isKingCheckmate) {
                                              alert(`King belonging to ${pieceOccupying?.getColor()} is in checkmate!`);
-                                             canGetMoves = true;
+                                             if (false) canGetMoves = true;
                                           }
+                                       } catch (ex) {
+                                          console.error(ex);
                                        }
 
                                        if (canGetMoves) {
