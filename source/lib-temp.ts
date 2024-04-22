@@ -15,7 +15,6 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
             const moves = getMoves(row, col, game);
             // Check if any move can attack the king's position
             if (moves.some(([destRow, destCol]) => destCol === kingColumn && destRow === kingRow)) {
-               alert(`King belonging to ${pieceKing?.getColor()} is in check!`);
                return true; // King is in check if any move can capture the king
             }
          }
@@ -25,7 +24,6 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
 }
 
 export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Game, color: color): boolean {
-   console.log(`color`, color);
    if (!isKingInCheck(kingRow, kingColumn, game, color)) {
       return false; // Not in checkmate if not currently in check
    }
@@ -34,7 +32,6 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
    let movesOpposition: move[] = [];
    let movesMineKing: move[] = [];
 
-   // Loop through all board squares
    for (let row = 0; row <= 7; row++) {
       for (let col = 0; col <= 7; col++) {
          const piece = game.getPiece(row, col);
@@ -42,7 +39,7 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
          if (piece !== null) {
             if (piece?.getType() == "king" && piece?.getColor() == color) {
                const moves = getMoves(row, col, game);
-               console.log(`kling movess`, moves);
+               if (false) console.log(`kling movess`, moves);
                if (moves?.length > 0) {
                   movesMineKing = movesMineKing.concat(moves);
                }
@@ -74,7 +71,7 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
       }
    }
 
-   console.log(`movesOpposition`, movesOpposition);
+   if (true) console.log(`movesOpposition`, movesOpposition);
 
    for (let [__row, __col] of movesOpposition) {
       movesMineKing = Enumerable.from(movesMineKing)
@@ -82,8 +79,10 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
          .toArray();
    }
 
-   console.log(`movesMine`, movesMine);
-   console.log(`movesMineKing`, movesMineKing);
+   if (true) {
+      console.log(`movesMine`, movesMine);
+      console.log(`movesMineKing`, movesMineKing);
+   }
 
    if (movesMineKing?.length > 0) {
       return false;
@@ -232,15 +231,16 @@ export function fillBoardCheckmateAlt(game: Game) {
          if (row == 2 && col == 0) {
             piece = new Piece("king", "black");
          }
-         let rowMagic = 0;
-         if (row == rowMagic && col == 7) {
-            piece = new Piece("king", "white");
-         }
 
          if (false)
             if (row == 1 && col == 6) {
                piece = new Piece("pawn", "white");
             }
+
+         let rowMagic = 0;
+         if (row == rowMagic && col == 7) {
+            piece = new Piece("king", "white");
+         }
 
          rowArray.push(piece);
       }

@@ -27,7 +27,9 @@ const Board: React.FC<{}> = ({}) => {
 
    return (
       <>
-         <div className="col-12 pb-4">{refPieceCurrent.current != null ? <>has moves!</> : <> </>}</div>
+         <div className="col-12 pb-4">
+            {refPieceCurrentMoves.current != null && refPieceCurrentMoves.current?.length > 0 ? <>has moves!</> : <> </>}
+         </div>
          <div className="col pb-4">
             <button
                className="btn btn-primary"
@@ -143,18 +145,17 @@ const Board: React.FC<{}> = ({}) => {
                                        let king = pieceSearchKing.piece;
                                        let rowKing = pieceSearchKing.row;
                                        let colKing = pieceSearchKing.col;
-                                       console.log(`pieceSearchKing`, pieceSearchKing);
 
-                                       let isKingCheckmate = false;
+                                       let isKingCheck = isKingInCheck(rowKing, colKing, game, king?.getColor()!);
+                                       if (isKingCheck) {
+                                          alert(`King belonging to ${pieceOccupying?.getColor()} is in check!`);
+                                          canGetMoves = true;
+                                       }
 
-                                       try {
-                                          isKingCheckmate = isKingInCheckmate(rowKing, colKing, game, king?.getColor()!);
-                                          if (isKingCheckmate) {
-                                             alert(`King belonging to ${pieceOccupying?.getColor()} is in checkmate!`);
-                                             if (false) canGetMoves = true;
-                                          }
-                                       } catch (ex) {
-                                          console.error(ex);
+                                       let isKingCheckmate = isKingInCheckmate(rowKing, colKing, game, king?.getColor()!);
+                                       if (isKingCheckmate) {
+                                          alert(`King belonging to ${pieceOccupying?.getColor()} is in checkmate!`);
+                                          canGetMoves = false;
                                        }
 
                                        if (canGetMoves) {
