@@ -23,12 +23,14 @@ export type Message = User & {
       | "proposeuserconfirm"
       | "proposeuserdecline"
       | "startgame"
-      | "setuser"
-      | "makemove"
-      | "getboard"
       | "propose"
       | "getavailableplayers"
-      | "test";
+      | "test"
+      | "setboard"
+      | "receiveboard"
+      // | "checkgame"
+      | "updateboard"
+      | "getboard";
    values?: Record<string, string>;
 
    to?: string;

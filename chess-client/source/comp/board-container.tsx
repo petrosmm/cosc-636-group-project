@@ -117,6 +117,16 @@ const BoardContainer: React.FC<{
                   break;
                }
 
+               case "updateboard": {
+                  const values: Array<[string, string]> = Object.entries(event?.values!);
+                  let game = values[0][1];
+
+                  // TODO MAX
+                  // console.log(`board`, board);
+
+                  break;
+               }
+
                // nothing else
                default:
                   break;
@@ -217,7 +227,7 @@ const BoardContainer: React.FC<{
          )}
 
          <div className="row">
-            <Board />
+            <Board inputSocket={socket} />
          </div>
       </>
    );
