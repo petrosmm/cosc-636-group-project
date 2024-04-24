@@ -37,6 +37,8 @@ const BoardContainer: React.FC<{
       makeSocket();
    }, []);
 
+   useEffect(() => {}, [players]);
+
    function makeSocket() {
       let _socket = io(WS_URL(), {
          query: { username: username },
@@ -58,6 +60,7 @@ const BoardContainer: React.FC<{
                case "getavailableplayers": {
                   if (event?.values !== undefined) {
                      const arrayFromRecords: Array<[string, string]> = Object.entries(event?.values!);
+                     console.log(`arrayFromRecords`, arrayFromRecords);
 
                      if (arrayFromRecords.length > 0) {
                         let players = Enumerable.from(arrayFromRecords)

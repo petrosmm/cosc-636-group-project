@@ -10,7 +10,7 @@ import { fillBoardCheck, fillBoardCheckmate, fillBoardCheckmateAlt, fillBoardSta
 export const PORT_SERVER = 8081;
 
 export type User = {
-   socketId: string | null;
+   socketId?: string | null;
    username?: string;
 };
 
@@ -146,8 +146,8 @@ export class Game {
    }
 
    private fillBoard() {
-      if (false) fillBoardStandard(this);
-      if (true) fillBoardCheck(this);
+      if (true) fillBoardStandard(this);
+      if (false) fillBoardCheck(this);
       if (false) fillBoardCheckmate(this);
       if (false) fillBoardCheckmateAlt(this);
    }
@@ -205,6 +205,7 @@ export class Game {
       rowTo: number,
       columnTo: number,
       setGame: React.Dispatch<React.SetStateAction<Game>>,
+      username: string | null | undefined,
       socket?: SocketClient,
       metaData?: move[2]
    ) {
@@ -276,29 +277,39 @@ export class Game {
                alert("pawn promoted!");
             }
 
-            this.updateBoard(setGame, this, socket);
+            this.updateBoard(setGame, this, username, socket);
             return;
          }
 
-         this.updateBoard(setGame, this, socket);
+         this.updateBoard(setGame, this, username, socket);
       }
    }
 
-   private updateBoard(setGame: React.Dispatch<React.SetStateAction<Game>>, game: Game, socket?: SocketClient) {
+   private updateBoard(
+      setGame: React.Dispatch<React.SetStateAction<Game>>,
+      game: Game,
+      username: string | null | undefined,
+      socket?: SocketClient
+   ) {
       if (game.turn == "white") {
          game.turn = "black";
       } else {
          game.turn = "white";
       }
+      let gameNew = _.clone(game);
+
+      // send updated game
+      let message = {
+         command: "updateboard",
+         username: username,
+         values: { "0": JSON.stringify(gameNew) }
+      } as Message;
+
+      socket?.emit("from-client", message);
 
       setGame((prevGame: any) => {
-         return _.clone(game);
+         return gameNew;
       });
-
-      console.log(`socket client`, socket);
-      // TODO MAX
-      if (false) socket?.emit("from-client");
-      // ("updateboard");
    }
 
    private assignPlayers(username1: string, username2: string) {

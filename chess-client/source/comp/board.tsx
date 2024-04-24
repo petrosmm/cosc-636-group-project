@@ -70,18 +70,18 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     game.movePiece(7, 2, 4, 3, setGame, socket);
-                     game.movePiece(7, 1, 4, 4, setGame, socket);
-                     game.movePiece(7, 5, 4, 5, setGame, socket);
-                     game.movePiece(7, 6, 4, 6, setGame, socket);
-                     game.movePiece(7, 4, 4, 2, setGame, socket);
+                     game.movePiece(7, 2, 4, 3, setGame, inputUsername, socket);
+                     game.movePiece(7, 1, 4, 4, setGame, inputUsername, socket);
+                     game.movePiece(7, 5, 4, 5, setGame, inputUsername, socket);
+                     game.movePiece(7, 6, 4, 6, setGame, inputUsername, socket);
+                     game.movePiece(7, 4, 4, 2, setGame, inputUsername, socket);
 
-                     game.movePiece(0, 2, 5, 3, setGame, socket);
-                     game.movePiece(0, 1, 5, 4, setGame, socket);
+                     game.movePiece(0, 2, 5, 3, setGame, inputUsername, socket);
+                     game.movePiece(0, 1, 5, 4, setGame, inputUsername, socket);
 
-                     game.movePiece(0, 5, 5, 6, setGame, socket);
-                     game.movePiece(0, 6, 5, 5, setGame, socket);
-                     game.movePiece(0, 4, 5, 2, setGame, socket);
+                     game.movePiece(0, 5, 5, 6, setGame, inputUsername, socket);
+                     game.movePiece(0, 6, 5, 5, setGame, inputUsername, socket);
+                     game.movePiece(0, 4, 5, 2, setGame, inputUsername, socket);
                   }}>
                   Test general
                </button>
@@ -90,8 +90,8 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     if (false) game.movePiece(6, 1, 0, 1, setGame, socket);
-                     game.movePiece(1, 6, 7, 1, setGame, socket);
+                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputUsername, socket);
+                     game.movePiece(1, 6, 7, 1, setGame, inputUsername, socket);
                   }}>
                   Test Pawn promotion
                </button>
@@ -100,8 +100,8 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     if (false) game.movePiece(6, 1, 0, 1, setGame, socket);
-                     game.movePiece(0, 4, 3, 3, setGame, socket);
+                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputUsername, socket);
+                     game.movePiece(0, 4, 3, 3, setGame, inputUsername, socket);
                   }}>
                   Test Queen
                </button>
@@ -146,6 +146,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                              indexRowOriginal,
                                              indexColOriginal,
                                              setGame,
+                                             inputUsername,
                                              socket,
                                              move[2]
                                           );

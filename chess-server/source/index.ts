@@ -134,31 +134,9 @@ wssServer.on("connection", (connection) => {
 
          switch (dataParsed?.command) {
             case "refreshboard": {
-               let values = {} as Record<string, string>;
-               let game = Enumerable.from(games)
-                  .where((p) => p.getPlayers().find((p) => p.username == dataParsed.username) !== undefined)
-                  .firstOrDefault();
-
-               if (game != undefined) {
-                  console.log("found game for!: ", dataParsed.username);
-
-                  values[0] = JSON.stringify(game);
-                  let message = {
-                     command: "receiveboard",
-                     values: values
-                  } as Message;
-
-                  let usernames = Enumerable.from(game.getPlayers())
-                     .select((p) => p.username)
-                     .toArray();
-                  let _clients = Enumerable.from(clients)
-                     .where((p) => usernames.includes(p.username!))
-                     .toArray();
-                  _clients.forEach((p) => {
-                     p.socket.emit("from-server", message);
-                  });
-
-                  // connection.emit("from-server", message);
+               let username = dataParsed.username;
+               if (username != undefined) {
+                  refreshBoard(username);
                }
 
                break;
@@ -181,11 +159,10 @@ wssServer.on("connection", (connection) => {
                   })
                   .distinct();
 
-               if (false) _clientsAsAvailablePlayers = _clientsAsAvailablePlayers.where((p) => p != dataParsed.username);
-
                _clientsAsAvailablePlayers.forEach((p, index) => {
                   values[index.toString()] = p!;
                });
+
                let message = {
                   command: "getavailableplayers",
                   values: values
@@ -229,6 +206,24 @@ wssServer.on("connection", (connection) => {
                break;
             }
 
+            case "updateboard": {
+               let username = dataParsed.username;
+               let indexGame = games.findIndex((p) => p.getPlayers().find((p) => p.username == username));
+               if (indexGame > 0) {
+                  console.log("found game to update");
+
+                  let values = dataParsed?.values !== undefined ? dataParsed?.values[0] : null;
+                  //  let _gameNew = JSON.parse(values);
+                  games[indexGame];
+
+                  if (username != undefined) {
+                     refreshBoard(username);
+                  }
+               }
+
+               break;
+            }
+
             case "test": {
                if (false)
                   await new Promise<void>(async (resolve) => {
@@ -258,3 +253,32 @@ wssServer.on("connection", (connection) => {
       }
    });
 });
+
+function refreshBoard(username: string) {
+   let values = {} as Record<string, string>;
+   let game = Enumerable.from(games)
+      .where((p) => p.getPlayers().find((p) => p.username == username) !== undefined)
+      .firstOrDefault();
+
+   if (game != undefined) {
+      console.log("found game for!: ", username);
+
+      values[0] = JSON.stringify(game);
+      let message = {
+         command: "receiveboard",
+         values: values
+      } as Message;
+
+      let usernames = Enumerable.from(game.getPlayers())
+         .select((p) => p.username)
+         .toArray();
+      let _clients = Enumerable.from(clients)
+         .where((p) => usernames.includes(p.username!))
+         .toArray();
+      _clients.forEach((p) => {
+         p.socket.emit("from-server", message);
+      });
+
+      // connection.emit("from-server", message);
+   }
+}
