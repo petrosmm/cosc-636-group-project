@@ -209,8 +209,6 @@ export class Game {
       metaData?: move[2]
    ) {
       let _piece = this.getPiece(rowFrom, columnFrom);
-      /** current turn */
-      let isBlack = _piece?.getColor() == "black";
 
       if (_piece != null) {
          if (_piece.isFirstMove) {
@@ -278,11 +276,11 @@ export class Game {
                alert("pawn promoted!");
             }
 
-            this.updateBoard(setGame, this);
+            this.updateBoard(setGame, this, socket);
             return;
          }
 
-         this.updateBoard(setGame, this);
+         this.updateBoard(setGame, this, socket);
       }
    }
 
