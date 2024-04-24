@@ -3,7 +3,7 @@ import useStateRef from "react-usestateref";
 import { Socket, io } from "socket.io-client";
 import Picker from "./picker";
 import Enumerable from "linq";
-import { Message, User } from "../../../source/lib";
+import { Game, Message, User } from "../../../source/lib";
 import React from "react";
 import Board from "./board";
 
@@ -23,9 +23,7 @@ const BoardContainer: React.FC<{
    const [isConnected, setIsConnected] = useStateRef(false);
    const [socket, setSocket, refSocket] = useStateRef(null as unknown as Socket<any, any>);
    const [players, setPlayers, refPlayers] = useStateRef([] as string[]);
-
-   // let _socket = null as unknown as Socket<any, any>
-   function getSocket() {}
+   const [game, setGame] = useState(null as unknown as Game);
 
    useEffect(() => {
       let doIgnore = false;
@@ -108,7 +106,7 @@ const BoardContainer: React.FC<{
                   alert(`Starting game with ${event?.from}. Please remember white goes first!`);
 
                   let message = {
-                     command: "getboard",
+                     command: "refreshboard",
                      username: username
                   } as Message;
 
@@ -118,11 +116,23 @@ const BoardContainer: React.FC<{
                }
 
                case "updateboard": {
-                  const values: Array<[string, string]> = Object.entries(event?.values!);
-                  let game = values[0][1];
+                  break;
+               }
 
-                  // TODO MAX
-                  // console.log(`board`, board);
+               case "receiveboard": {
+                  const values: Array<[string, string]> = Object.entries(event?.values!);
+                  let _game = JSON.parse(values[0][1]) as Game;
+                  console.log(`game`, game);
+
+                  const _gameNew = new Game("", "", game);
+
+                  console.log(`_gameNew`, _gameNew);
+                  if (true)
+                     if (_gameNew.board !== undefined) {
+                        setGame((prevGame: any) => {
+                           return _gameNew;
+                        });
+                     }
 
                   break;
                }
@@ -226,9 +236,11 @@ const BoardContainer: React.FC<{
             </div>
          )}
 
-         <div className="row">
-            <Board inputSocket={socket} />
-         </div>
+         {game && (
+            <div className="row">
+               <Board inputSocket={socket} inputGame={game} />
+            </div>
+         )}
       </>
    );
 };

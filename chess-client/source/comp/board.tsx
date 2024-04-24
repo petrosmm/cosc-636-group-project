@@ -8,21 +8,31 @@ import { getMoves } from "../../../source/lib-moves";
 import { isKingInCheck, isKingInCheckmate } from "../../../source/lib-temp";
 import { Socket } from "socket.io-client";
 
-const Board: React.FC<{ inputSocket: Socket }> = ({ inputSocket }) => {
-   const [socket, setSocket] = useState(inputSocket);
-   const [game, setGame, refGame] = useStateRef(null as unknown as Game);
+const Board: React.FC<{ inputSocket: Socket; inputGame?: Game }> = ({ inputSocket, inputGame }) => {
+   const [socket, setSocket] = useState(null as unknown as Socket);
+   const [game, setGame] = useState(null as unknown as Game);
    const [pieceCurrent, setPieceCurrent, refPieceCurrent] = useStateRef(null as unknown as [number, number] | null);
    const [pieceCurrentMoves, setPieceCurrentMoves, refPieceCurrentMoves] = useStateRef([] as unknown as move[]);
 
    useEffect(() => {
       let doIgnore = false;
 
+      // do once....
+
       return () => {
          doIgnore = true;
       };
    }, []);
 
-   useEffect(() => {}, []);
+   useEffect(() => {
+      setSocket(inputSocket);
+
+      console.log(`inputGame`, inputGame);
+
+      if (inputGame != null) {
+         setGame(inputGame);
+      }
+   }, []);
 
    return (
       <>

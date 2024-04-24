@@ -248,5 +248,7 @@ export function fillBoardCheckmateAlt(game: Game) {
       game.board.push(rowArray);
    }
 
-   console.log(game);
+   if (false) {
+      console.log(`fillBoardCheckmateAlt()`, game);
+   }
 }

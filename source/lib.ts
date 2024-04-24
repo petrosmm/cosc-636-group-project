@@ -17,6 +17,12 @@ export type MessageClient = User & {
    socket: Socket<any, any, any, any>;
 };
 
+export type color = "white" | "black";
+export type status = "pawnpromotion" | "checkmate" | "check" | null;
+export type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
+export type board = (Piece | null)[][];
+export type move = [number, number, "en-passant" | "castling" | null];
+
 export type Message = User & {
    command?:
       | "proposeuser"
@@ -26,22 +32,16 @@ export type Message = User & {
       | "propose"
       | "getavailableplayers"
       | "test"
-      | "setboard"
-      | "receiveboard"
+      // | "setboard"
+      | /** used by client */ "receiveboard"
       // | "checkgame"
       | "updateboard"
-      | "getboard";
+      | "refreshboard";
    values?: Record<string, string>;
 
    to?: string;
    from?: string;
 };
-
-export type color = "white" | "black";
-export type status = "pawnpromotion" | "checkmate" | "check" | null;
-export type type = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
-export type board = (Piece | null)[][];
-export type move = [number, number, "en-passant" | "castling" | null];
 
 type Player = {
    username: string;
@@ -49,9 +49,9 @@ type Player = {
 };
 
 export class Piece {
-   private id = "";
-   private type?: type;
-   private color?: color;
+   public id = "";
+   public type?: type;
+   public color?: color;
    public isFirstMove;
    /** used for en passant oui oui */
    public isFirstRecentlyTaken;
@@ -91,24 +91,52 @@ export class Game {
    public turn: color;
    public board: board = [];
    public isGameOver: boolean;
+   public winner: string = null!;
    public status: status = null;
 
    // need a timer that gets passed back and forth...
 
-   public constructor(username1: string, username2: string) {
-      this.assignPlayers(username1, username2);
-      this.turn = "white";
-      this.isGameOver = false;
+   public constructor(username1: string, username2: string, game?: Game) {
+      if (game == undefined) {
+         this.assignPlayers(username1, username2);
+         this.turn = "white";
+         this.isGameOver = false;
 
-      // specific order
-      this.fillBoard();
+         // specific order
+         this.fillBoard();
+      } else {
+         // incoming game
+         this.players = game.players;
+         this.turn = game.turn;
+         this.isGameOver = game.isGameOver;
+         this.board = game.board;
+         this.boardInactive = game.boardInactive;
+         this.winner = game.winner;
+         this.status = game.status;
+         this.board.forEach((row, index) => {
+            row.forEach((col) => {
+               if (col != null) {
+                  let colNew = new Piece(col.type!, col.color!);
+                  col = colNew;
+               }
+            });
+         });
+         this.boardInactive.forEach((col, index) => {
+            if (col != null) {
+               let colNew = new Piece(col.type!, col.color!);
+               col = colNew;
+            }
+         });
+
+         console.log(`this.board`, this.board);
+      }
    }
 
    private fillBoard() {
       if (false) fillBoardStandard(this);
-      if (false) fillBoardCheck(this);
+      if (true) fillBoardCheck(this);
       if (false) fillBoardCheckmate(this);
-      if (true) fillBoardCheckmateAlt(this);
+      if (false) fillBoardCheckmateAlt(this);
    }
 
    public getPiece(row: number, column: number) {
