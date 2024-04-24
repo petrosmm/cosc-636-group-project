@@ -146,7 +146,9 @@ export function fillBoardStandard(game: Game) {
       game.board.push(rowArray);
    }
 
-   if (false) console.log(game.board);
+   if (false) {
+      console.log(`fillBoardStandard()`, game);
+   }
 }
 
 export function fillBoardCheck(game: Game) {
@@ -175,7 +177,9 @@ export function fillBoardCheck(game: Game) {
       game.board.push(rowArray);
    }
 
-   console.log(game);
+   if (false) {
+      console.log(`fillBoardCheck()`, game);
+   }
 }
 
 export function fillBoardCheckmate(game: Game) {
@@ -209,7 +213,9 @@ export function fillBoardCheckmate(game: Game) {
       game.board.push(rowArray);
    }
 
-   console.log(game);
+   if (false) {
+      console.log(`fillBoardCheckmate()`, game);
+   }
 }
 
 export function fillBoardCheckmateAlt(game: Game) {

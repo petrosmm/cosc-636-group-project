@@ -77,6 +77,8 @@ wssServer.on("connection", (connection) => {
    connection.on("from-client", async (data) => {
       let dataParsed = data as Message;
 
+      clients = purgeEmptyClients(clients);
+
       if (dataParsed != null) {
          console.log(`messageIncoming`, dataParsed);
 
@@ -170,7 +172,8 @@ wssServer.on("connection", (connection) => {
                      .select((p) => p.id)
                      .toArray();
                }
-               console.log(`clients`, clients);
+               if (false) console.log(`clients`, clients);
+
                let _clientsAsAvailablePlayers = Enumerable.from(clients)
                   .where((p) => p.socket.connected)
                   .select((p) => {
@@ -220,6 +223,7 @@ wssServer.on("connection", (connection) => {
                }
 
                let game = new Game(dataParsed.to!, dataParsed.from!);
+               console.log("creating new game!");
                games.push(game);
 
                break;
@@ -251,8 +255,6 @@ wssServer.on("connection", (connection) => {
             default:
                break;
          }
-
-         if (false) clients = purgeEmptyClients(clients);
       }
    });
 });

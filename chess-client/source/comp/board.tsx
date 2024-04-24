@@ -2,17 +2,22 @@ import React from "react";
 import { useState, useEffect } from "react";
 import useStateRef from "react-usestateref";
 
-import { Game, move } from "../../../source/lib";
+import { Game, color, move } from "../../../source/lib";
 import Enumerable from "linq";
 import { getMoves } from "../../../source/lib-moves";
 import { isKingInCheck, isKingInCheckmate } from "../../../source/lib-temp";
 import { Socket } from "socket.io-client";
 
-const Board: React.FC<{ inputSocket: Socket; inputGame?: Game }> = ({ inputSocket, inputGame }) => {
+const Board: React.FC<{ inputSocket: Socket; inputGame?: Game; inputUsername?: string }> = ({
+   inputSocket,
+   inputGame,
+   inputUsername
+}) => {
    const [socket, setSocket] = useState(null as unknown as Socket);
    const [game, setGame] = useState(null as unknown as Game);
    const [pieceCurrent, setPieceCurrent, refPieceCurrent] = useStateRef(null as unknown as [number, number] | null);
    const [pieceCurrentMoves, setPieceCurrentMoves, refPieceCurrentMoves] = useStateRef([] as unknown as move[]);
+   const [colorMine, setColorMine] = useState(null as unknown as color);
 
    useEffect(() => {
       let doIgnore = false;
@@ -27,19 +32,28 @@ const Board: React.FC<{ inputSocket: Socket; inputGame?: Game }> = ({ inputSocke
    useEffect(() => {
       setSocket(inputSocket);
 
-      console.log(`inputGame`, inputGame);
+      if (false) console.log(`inputGame`, inputGame);
 
       if (inputGame != null) {
          setGame(inputGame);
+
+         let player = inputGame.getPlayers().find((p) => p.username == inputUsername);
+
+         if (false) console.log(`player`, player, inputGame);
+
+         if (player != undefined) {
+            setColorMine(player.color);
+         }
       }
    }, []);
 
    return (
       <>
          <div className="row" hidden={game == null}>
-            <div className="col-12 pb-4">
+            <div className="col-1 pb-4">
                {refPieceCurrentMoves.current != null && refPieceCurrentMoves.current?.length > 0 ? <>has moves!</> : <> </>}
             </div>
+            <div className="col-1 pb-4">{colorMine}</div>
          </div>
          <div className="row" hidden={game == null}>
             <div className="col pb-4">
@@ -144,7 +158,7 @@ const Board: React.FC<{ inputSocket: Socket; inputGame?: Game }> = ({ inputSocke
 
                            let display = (
                               <>
-                                 {isActualPiece && pieceOccupant?.getColor() == game.turn ? (
+                                 {isActualPiece && colorMine == game.turn && pieceOccupant?.getColor() == game.turn ? (
                                     <button
                                        title={pieceOccupant?.getId()}
                                        onClick={() => {

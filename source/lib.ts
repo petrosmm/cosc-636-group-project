@@ -107,28 +107,40 @@ export class Game {
       } else {
          // incoming game
          this.players = game.players;
+         console.log(`game.players`, game.players);
+         if (false)
+            this.players.forEach((item, index) => {
+               if (item != null) {
+                  //   let playerNew = new Player();
+               }
+            });
          this.turn = game.turn;
          this.isGameOver = game.isGameOver;
-         this.board = game.board;
-         this.boardInactive = game.boardInactive;
+
          this.winner = game.winner;
          this.status = game.status;
-         this.board.forEach((row, index) => {
-            row.forEach((col) => {
+
+         game.board.forEach((row, index) => {
+            row.forEach((col, index) => {
                if (col != null) {
                   let colNew = new Piece(col.type!, col.color!);
-                  col = colNew;
+                  row[index] = colNew;
                }
             });
          });
-         this.boardInactive.forEach((col, index) => {
+
+         game.boardInactive.forEach((col, index) => {
             if (col != null) {
                let colNew = new Piece(col.type!, col.color!);
-               col = colNew;
+               game.boardInactive[index] = colNew;
             }
          });
 
-         console.log(`this.board`, this.board);
+         // reset the actual board, back
+         this.board = game.board;
+         this.boardInactive = game.boardInactive;
+
+         console.log(`game.board...`, game.board);
       }
    }
 
@@ -282,6 +294,9 @@ export class Game {
       setGame((prevGame: any) => {
          return _.clone(game);
       });
+
+      // TODO MAX
+      throw new Error("NOT IMPLEMENTED, NEED TO SYNC board")
    }
 
    private assignPlayers(username1: string, username2: string) {

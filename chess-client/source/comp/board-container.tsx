@@ -103,7 +103,7 @@ const BoardContainer: React.FC<{
                }
 
                case "startgame": {
-                  alert(`Starting game with ${event?.from}. Please remember white goes first!`);
+                  alert(`Starting game with ${event?.from}. When a game is fresh, please remember white goes first!`);
 
                   let message = {
                      command: "refreshboard",
@@ -122,17 +122,13 @@ const BoardContainer: React.FC<{
                case "receiveboard": {
                   const values: Array<[string, string]> = Object.entries(event?.values!);
                   let _game = JSON.parse(values[0][1]) as Game;
-                  console.log(`game`, game);
-
-                  const _gameNew = new Game("", "", game);
-
-                  console.log(`_gameNew`, _gameNew);
-                  if (true)
-                     if (_gameNew.board !== undefined) {
-                        setGame((prevGame: any) => {
-                           return _gameNew;
-                        });
-                     }
+                  const _gameNew = new Game("", "", _game);
+                  
+                  if (_gameNew.board !== undefined) {
+                     setGame((prevGame: any) => {
+                        return _gameNew;
+                     });
+                  }
 
                   break;
                }
@@ -238,7 +234,7 @@ const BoardContainer: React.FC<{
 
          {game && (
             <div className="row">
-               <Board inputSocket={socket} inputGame={game} />
+               <Board inputSocket={socket} inputGame={game} inputUsername={username} />
             </div>
          )}
       </>
