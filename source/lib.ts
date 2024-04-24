@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { Socket as SocketClient } from "socket.io-client";
 import { generateRandomNumber, generateRandomTextAndNumbers } from "./functions";
 import _ from "lodash";
 import * as Enumerable from "linq";
@@ -204,6 +205,7 @@ export class Game {
       rowTo: number,
       columnTo: number,
       setGame: React.Dispatch<React.SetStateAction<Game>>,
+      socket?: SocketClient,
       metaData?: move[2]
    ) {
       let _piece = this.getPiece(rowFrom, columnFrom);
@@ -284,7 +286,7 @@ export class Game {
       }
    }
 
-   private updateBoard(setGame: React.Dispatch<React.SetStateAction<Game>>, game: Game) {
+   private updateBoard(setGame: React.Dispatch<React.SetStateAction<Game>>, game: Game, socket?: SocketClient) {
       if (game.turn == "white") {
          game.turn = "black";
       } else {
@@ -295,8 +297,10 @@ export class Game {
          return _.clone(game);
       });
 
+      console.log(`socket client`, socket);
       // TODO MAX
-      throw new Error("NOT IMPLEMENTED, NEED TO SYNC board")
+      if (false) socket?.emit("from-client");
+      // ("updateboard");
    }
 
    private assignPlayers(username1: string, username2: string) {

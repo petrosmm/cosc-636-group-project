@@ -8,7 +8,7 @@ import { getMoves } from "../../../source/lib-moves";
 import { isKingInCheck, isKingInCheckmate } from "../../../source/lib-temp";
 import { Socket } from "socket.io-client";
 
-const Board: React.FC<{ inputSocket: Socket; inputGame?: Game; inputUsername?: string }> = ({
+const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUsername?: string }> = ({
    inputSocket,
    inputGame,
    inputUsername
@@ -69,18 +69,18 @@ const Board: React.FC<{ inputSocket: Socket; inputGame?: Game; inputUsername?: s
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     game.movePiece(7, 2, 4, 3, setGame);
-                     game.movePiece(7, 1, 4, 4, setGame);
-                     game.movePiece(7, 5, 4, 5, setGame);
-                     game.movePiece(7, 6, 4, 6, setGame);
-                     game.movePiece(7, 4, 4, 2, setGame);
+                     game.movePiece(7, 2, 4, 3, setGame, inputSocket);
+                     game.movePiece(7, 1, 4, 4, setGame, inputSocket);
+                     game.movePiece(7, 5, 4, 5, setGame, inputSocket);
+                     game.movePiece(7, 6, 4, 6, setGame, inputSocket);
+                     game.movePiece(7, 4, 4, 2, setGame, inputSocket);
 
-                     game.movePiece(0, 2, 5, 3, setGame);
-                     game.movePiece(0, 1, 5, 4, setGame);
+                     game.movePiece(0, 2, 5, 3, setGame, inputSocket);
+                     game.movePiece(0, 1, 5, 4, setGame, inputSocket);
 
-                     game.movePiece(0, 5, 5, 6, setGame);
-                     game.movePiece(0, 6, 5, 5, setGame);
-                     game.movePiece(0, 4, 5, 2, setGame);
+                     game.movePiece(0, 5, 5, 6, setGame, inputSocket);
+                     game.movePiece(0, 6, 5, 5, setGame, inputSocket);
+                     game.movePiece(0, 4, 5, 2, setGame, inputSocket);
                   }}>
                   Test general
                </button>
@@ -89,8 +89,8 @@ const Board: React.FC<{ inputSocket: Socket; inputGame?: Game; inputUsername?: s
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     if (false) game.movePiece(6, 1, 0, 1, setGame);
-                     game.movePiece(1, 6, 7, 1, setGame);
+                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputSocket);
+                     game.movePiece(1, 6, 7, 1, setGame, inputSocket);
                   }}>
                   Test Pawn promotion
                </button>
@@ -99,8 +99,8 @@ const Board: React.FC<{ inputSocket: Socket; inputGame?: Game; inputUsername?: s
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     if (false) game.movePiece(6, 1, 0, 1, setGame);
-                     game.movePiece(0, 4, 3, 3, setGame);
+                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputSocket);
+                     game.movePiece(0, 4, 3, 3, setGame, inputSocket);
                   }}>
                   Test Queen
                </button>
@@ -145,6 +145,7 @@ const Board: React.FC<{ inputSocket: Socket; inputGame?: Game; inputUsername?: s
                                              indexRowOriginal,
                                              indexColOriginal,
                                              setGame,
+                                             inputSocket,
                                              move[2]
                                           );
 

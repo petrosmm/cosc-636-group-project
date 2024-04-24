@@ -115,15 +115,11 @@ const BoardContainer: React.FC<{
                   break;
                }
 
-               case "updateboard": {
-                  break;
-               }
-
                case "receiveboard": {
                   const values: Array<[string, string]> = Object.entries(event?.values!);
                   let _game = JSON.parse(values[0][1]) as Game;
                   const _gameNew = new Game("", "", _game);
-                  
+
                   if (_gameNew.board !== undefined) {
                      setGame((prevGame: any) => {
                         return _gameNew;

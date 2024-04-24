@@ -1,7 +1,7 @@
 import { Piece, move, Game } from "./lib";
 const Enumerable = require("linq");
 
-export function getMoves(row: number, col: number, game: Game) {
+export function getMoves(row: number, col: number, game: Game, shouldShowDebug = true) {
    let _moves: move[] = [];
    let moves: move[] = [];
    let pieceOccupying = game.getPiece(row, col);
@@ -74,7 +74,7 @@ export function getMoves(row: number, col: number, game: Game) {
       console.log("no moves!");
    }
 
-   console.log(`moves`, moves);
+   if (shouldShowDebug) console.log(`moves`, moves);
 
    return moves;
 }

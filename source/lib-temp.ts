@@ -12,7 +12,7 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
          if (piece !== null && piece?.getColor() !== color) {
             // Check enemy pieces
             // Get moves for each piece type
-            const moves = getMoves(row, col, game);
+            const moves = getMoves(row, col, game, false);
             // Check if any move can attack the king's position
             if (moves.some(([destRow, destCol]) => destCol === kingColumn && destRow === kingRow)) {
                return true; // King is in check if any move can capture the king
@@ -38,7 +38,7 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
 
          if (piece !== null) {
             if (piece?.getType() == "king" && piece?.getColor() == color) {
-               const moves = getMoves(row, col, game);
+               const moves = getMoves(row, col, game, false);
                if (false) console.log(`kling movess`, moves);
                if (moves?.length > 0) {
                   movesMineKing = movesMineKing.concat(moves);
@@ -46,14 +46,14 @@ export function isKingInCheckmate(kingRow: number, kingColumn: number, game: Gam
             }
 
             if (piece?.getType() != "king" && piece?.getColor() == color) {
-               const moves = getMoves(row, col, game);
+               const moves = getMoves(row, col, game, false);
                if (moves?.length > 0) {
                   movesMine = movesMine.concat(moves);
                }
             }
 
             if (piece?.getColor() != color) {
-               const moves = getMoves(row, col, game);
+               const moves = getMoves(row, col, game, false);
                if (moves?.length > 0) {
                   movesOpposition = movesOpposition.concat(moves);
                }
