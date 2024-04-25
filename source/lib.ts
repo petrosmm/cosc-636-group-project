@@ -7,7 +7,7 @@ import { fillBoardCheck, fillBoardCheckmate, fillBoardCheckmateAlt, fillBoardSta
 
 //const Enumerable = require("linq");
 
-export const PORT_SERVER = 8081;
+export const PORT_SERVER = 8085;
 
 export type User = {
    socketId?: string | null;
