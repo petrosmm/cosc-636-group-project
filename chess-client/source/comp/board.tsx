@@ -31,7 +31,9 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
 
    useEffect(() => {
       setSocket(inputSocket);
+   }, [inputSocket]);
 
+   useEffect(() => {
       console.log(`inputGame`, inputGame);
 
       if (inputGame != null) {
@@ -43,7 +45,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
             setColorMine(player.color);
          }
       }
-   }, [inputGame, inputSocket]);
+   }, [inputGame]);
 
    return (
       <>
