@@ -106,14 +106,14 @@ const BoardContainer: React.FC<{
                }
 
                case "startgame": {
-                  alert(`Starting game with ${event?.from}. When a game is fresh, please remember white goes first!`);
-
                   let message = {
                      command: "refreshboard",
                      username: username
                   } as Message;
 
                   _socket?.emit("from-client", message);
+
+                  alert(`Starting game with ${event?.from}. When a game is fresh, please remember white goes first!`);
 
                   break;
                }
@@ -124,6 +124,9 @@ const BoardContainer: React.FC<{
                   const _gameNew = new Game("", "", _game);
 
                   if (_gameNew.board !== undefined) {
+                     console.log(`received new game`);
+                     console.log(`_gameNew`, _gameNew);
+
                      setGame((prevGame: any) => {
                         return _gameNew;
                      });

@@ -141,7 +141,7 @@ export class Game {
          this.board = game.board;
          this.boardInactive = game.boardInactive;
 
-         console.log(`game.board...`, game.board);
+         if (false!) console.log(`game.board...`, game.board);
       }
    }
 

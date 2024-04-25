@@ -212,12 +212,16 @@ wssServer.on("connection", (connection) => {
                if (indexGame > 0) {
                   console.log("found game to update");
 
-                  let values = dataParsed?.values !== undefined ? dataParsed?.values[0] : null;
-                  //  let _gameNew = JSON.parse(values);
-                  games[indexGame];
+                  let _gameNew = dataParsed?.values !== undefined ? dataParsed?.values[0] : null;
+                  if (_gameNew && _gameNew?.length > 0) {
+                     let gameNew = new Game("", "", JSON.parse(_gameNew));
+                     if (gameNew.getPlayers()?.length > 0) {
+                        games[indexGame] = gameNew;
 
-                  if (username != undefined) {
-                     refreshBoard(username);
+                        if (username != undefined) {
+                           refreshBoard(username);
+                        }
+                     }
                   }
                }
 

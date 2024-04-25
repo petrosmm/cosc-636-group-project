@@ -30,17 +30,14 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
    }, []);
 
    useEffect(() => {
-      console.log(`inputSocket`, inputSocket);
       setSocket(inputSocket);
 
-      if (false) console.log(`inputGame`, inputGame);
+      console.log(`inputGame`, inputGame);
 
       if (inputGame != null) {
          setGame(inputGame);
 
          let player = inputGame.getPlayers().find((p) => p.username == inputUsername);
-
-         if (false) console.log(`player`, player, inputGame);
 
          if (player != undefined) {
             setColorMine(player.color);
