@@ -108,13 +108,6 @@ export class Game {
       } else {
          // incoming game
          this.players = game.players;
-         console.log(`game.players`, game.players);
-         if (false)
-            this.players.forEach((item, index) => {
-               if (item != null) {
-                  //   let playerNew = new Player();
-               }
-            });
          this.turn = game.turn;
          this.isGameOver = game.isGameOver;
 

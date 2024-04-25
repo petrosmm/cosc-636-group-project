@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, MutableRefObject, RefObject, SetStateAction, useEffect, useRef, useState } from "react";
 import useStateRef from "react-usestateref";
 import { Socket, io } from "socket.io-client";
 import Picker from "./picker";
@@ -6,6 +6,7 @@ import Enumerable from "linq";
 import { Game, Message, User } from "../../../source/lib";
 import React from "react";
 import Board from "./board";
+import { generateUsername } from "../../../source/functions";
 
 const BoardContainer: React.FC<{
    ip: string;
@@ -24,6 +25,8 @@ const BoardContainer: React.FC<{
    const [socket, setSocket, refSocket] = useStateRef(null as unknown as Socket<any, any>);
    const [players, setPlayers, refPlayers] = useStateRef([] as string[]);
    const [game, setGame] = useState(null as unknown as Game);
+   const [keyChild, setKeyChild] = useState("");
+   const [keyChildPlayers, setKeyChildPlayers, refChildPlayers] = useStateRef("");
 
    useEffect(() => {
       let doIgnore = false;
@@ -36,8 +39,6 @@ const BoardContainer: React.FC<{
    useEffect(() => {
       makeSocket();
    }, []);
-
-   useEffect(() => {}, [players]);
 
    function makeSocket() {
       let _socket = io(WS_URL(), {
@@ -130,6 +131,8 @@ const BoardContainer: React.FC<{
                      setGame((prevGame: any) => {
                         return _gameNew;
                      });
+
+                     setKeyChild(generateUsername());
                   }
 
                   break;
@@ -154,6 +157,7 @@ const BoardContainer: React.FC<{
       } as Message;
 
       socket.emit("from-client", message);
+      setKeyChildPlayers(generateUsername());
    }
 
    function proposeUser(socket: Socket<any, any>, usernameFrom: string, usernameTo: string) {

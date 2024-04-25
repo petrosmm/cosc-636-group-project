@@ -43,7 +43,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
             setColorMine(player.color);
          }
       }
-   }, []);
+   }, [inputGame, inputSocket]);
 
    return (
       <>
