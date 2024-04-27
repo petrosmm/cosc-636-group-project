@@ -10,35 +10,35 @@ export function getMoves(row: number, col: number, game: Game, shouldShowDebug =
       if (pieceOccupying != null) {
          switch (pieceOccupying?.getType()) {
             case "pawn": {
-               _moves = getPawnMovesWithObstacles(row, col, game);
+               _moves = getPawnMovesWithObstacles(row, col, game, shouldShowDebug);
 
                break;
             }
 
             case "rook": {
-               _moves = getRookMovesWithObstacles(row, col, game);
+               _moves = getRookMovesWithObstacles(row, col, game, shouldShowDebug);
 
                break;
             }
 
             case "knight": {
-               _moves = getKnightMovesWithObstacles(row, col, game);
+               _moves = getKnightMovesWithObstacles(row, col, game, shouldShowDebug);
 
                break;
             }
 
             case "bishop": {
-               _moves = getBishopMovesWithObstacles(row, col, game);
+               _moves = getBishopMovesWithObstacles(row, col, game, shouldShowDebug);
                break;
             }
 
             case "queen": {
-               _moves = getQueenMovesWithObstacles(row, col, game);
+               _moves = getQueenMovesWithObstacles(row, col, game, shouldShowDebug);
                break;
             }
 
             case "king": {
-               _moves = getKingMovesWithObstacles(row, col, game);
+               _moves = getKingMovesWithObstacles(row, col, game, shouldShowDebug);
 
                break;
             }
@@ -79,7 +79,7 @@ export function getMoves(row: number, col: number, game: Game, shouldShowDebug =
    return moves;
 }
 
-function getRookMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getRookMovesWithObstacles(row: number, column: number, game: Game, shouldShowDebug: boolean): Array<move> {
    let piece = game.getPiece(row, column);
    let isBlack = piece?.getColor() == "black";
    const rowHome = isBlack ? 0 : 7;
@@ -152,7 +152,7 @@ function getRookMovesWithObstacles(row: number, column: number, game: Game): Arr
    return moves;
 }
 
-function getKnightMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getKnightMovesWithObstacles(row: number, column: number, game: Game, shouldShowDebug: boolean): Array<move> {
    let moves: Array<move> = [];
    let pieceMine = game.getPiece(row, column);
    // All possible "L" moves for a knight
@@ -193,7 +193,7 @@ function getKnightMovesWithObstacles(row: number, column: number, game: Game): A
    return moves;
 }
 
-function getKingMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getKingMovesWithObstacles(row: number, column: number, game: Game, shouldShowDebug: boolean): Array<move> {
    let moves: Array<move> = [];
 
    const directionsKing = [
@@ -221,7 +221,7 @@ function getKingMovesWithObstacles(row: number, column: number, game: Game): Arr
    return moves;
 }
 
-function getBishopMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getBishopMovesWithObstacles(row: number, column: number, game: Game, shouldShowDebug: boolean): Array<move> {
    let moves: Array<move> = [];
    let pieceMine = game.getPiece(row, column);
    let colorMine = pieceMine?.getColor();
@@ -303,7 +303,7 @@ function getBishopMovesWithObstacles(row: number, column: number, game: Game): A
    return moves;
 }
 
-function getQueenMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getQueenMovesWithObstacles(row: number, column: number, game: Game, shouldShowDebug: boolean): Array<move> {
    let moves: Array<move> = [];
 
    const directions = [
@@ -342,7 +342,7 @@ function getQueenMovesWithObstacles(row: number, column: number, game: Game): Ar
    return moves;
 }
 
-function getPawnMovesWithObstacles(row: number, column: number, game: Game): Array<move> {
+function getPawnMovesWithObstacles(row: number, column: number, game: Game, shouldShowDebug: boolean): Array<move> {
    let piece = game.getPiece(row, column);
    let isBlack = piece?.getColor() == "black";
    let moves: Array<move> = [];
@@ -355,15 +355,17 @@ function getPawnMovesWithObstacles(row: number, column: number, game: Game): Arr
       moves.push([newRow, column, null]);
 
       // double move
-      if (piece?.hasDoneFirstMove() || row === startRow) {
+      //  || piece?.hasDoneFirstMove()
+      if (row === startRow) {
          if (false) console.log(row);
+         if (false) console.log(`piece getPawnMovesWithObstacles`, piece);
 
          let twoStepsRow = row + 2 * direction;
 
          if (false) console.log(`twoStepsRow`, twoStepsRow);
 
          if (twoStepsRow >= 0 && twoStepsRow <= 7 && game.board[twoStepsRow][column] === null) {
-            console.log("Double move");
+            if (shouldShowDebug) console.log("Double move");
             moves.push([twoStepsRow, column, null]);
          }
       }

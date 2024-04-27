@@ -25,8 +25,6 @@ const BoardContainer: React.FC<{
    const [socket, setSocket, refSocket] = useStateRef(null as unknown as Socket<any, any>);
    const [players, setPlayers, refPlayers] = useStateRef([] as string[]);
    const [game, setGame] = useState(null as unknown as Game);
-   const [keyChild, setKeyChild] = useState("");
-   const [keyChildPlayers, setKeyChildPlayers, refChildPlayers] = useStateRef("");
 
    useEffect(() => {
       let doIgnore = false;
@@ -121,18 +119,20 @@ const BoardContainer: React.FC<{
 
                case "receiveboard": {
                   const values: Array<[string, string]> = Object.entries(event?.values!);
-                  let _game = JSON.parse(values[0][1]) as Game;
-                  const _gameNew = new Game("", "", _game);
+                  let _gameRaw = JSON.parse(values[0][1]) as Game;
+                  const _gameNew = new Game("", "", _gameRaw);
 
+                  console.log(`_gameRaw`, _gameRaw);
+                  console.log(`_gameNew`, _gameNew);
                   if (_gameNew.board !== undefined) {
-                     console.log(`received new game`);
-                     console.log(`_gameNew`, _gameNew);
+                     if (false) {
+                        console.log(`received new game`);
+                        console.log(`_gameNew`, _gameNew);
+                     }
 
                      setGame((prevGame: any) => {
                         return _gameNew;
                      });
-
-                     setKeyChild(generateUsername());
                   }
 
                   break;
@@ -157,7 +157,6 @@ const BoardContainer: React.FC<{
       } as Message;
 
       socket.emit("from-client", message);
-      setKeyChildPlayers(generateUsername());
    }
 
    function proposeUser(socket: Socket<any, any>, usernameFrom: string, usernameTo: string) {

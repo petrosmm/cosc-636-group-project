@@ -34,9 +34,7 @@ export type Message = User & {
       | "propose"
       | "getavailableplayers"
       | "test"
-      // | "setboard"
       | /** used by client */ "receiveboard"
-      // | "checkgame"
       | "updateboard"
       | "refreshboard";
    values?: Record<string, string>;
@@ -119,14 +117,24 @@ export class Game {
             row.forEach((col, index) => {
                if (col != null) {
                   let colNew = new Piece(col.type!, col.color!);
+                  colNew.isFirstMove = col.isFirstMove;
+                  colNew.isFirstRecentlyTaken = col.isFirstRecentlyTaken;
+                  if (false!)
+                     if (!col.isFirstMove || col.isFirstRecentlyTaken) {
+                        console.log(`implanting peice`, col);
+                     }
                   row[index] = colNew;
                }
             });
          });
+         
+         if (false!) console.log(`game.board`, game.board);
 
          game.boardInactive.forEach((col, index) => {
             if (col != null) {
                let colNew = new Piece(col.type!, col.color!);
+               colNew.isFirstMove = col.isFirstMove;
+               colNew.isFirstRecentlyTaken = col.isFirstRecentlyTaken;
                game.boardInactive[index] = colNew;
             }
          });
@@ -144,6 +152,17 @@ export class Game {
       if (false) fillBoardCheck(this);
       if (false) fillBoardCheckmate(this);
       if (false) fillBoardCheckmateAlt(this);
+   }
+
+   public setGameOver(
+      setGame: React.Dispatch<React.SetStateAction<Game>>,
+      winner: color,
+      username: string,
+      socket: SocketClient
+   ) {
+      this.isGameOver = true;
+      this.winner = winner;
+      this.updateBoard(setGame, this, username, socket);
    }
 
    public getPiece(row: number, column: number) {
@@ -207,13 +226,31 @@ export class Game {
       let _piece = this.getPiece(rowFrom, columnFrom);
 
       if (_piece != null) {
+         if (false!)
+            if (_piece.isFirstRecentlyTaken) {
+               _piece.isFirstMove = false;
+               _piece.isFirstRecentlyTaken = false;
+            } else if (_piece.isFirstMove) {
+               _piece.isFirstMove = false;
+               _piece.isFirstRecentlyTaken = true;
+            } else {
+               _piece.isFirstMove = false;
+               _piece.isFirstRecentlyTaken = false;
+            }
+
          if (_piece.isFirstMove) {
             _piece.isFirstMove = false;
             _piece.isFirstRecentlyTaken = true;
-         } else {
+         } else if (_piece.isFirstRecentlyTaken) {
             _piece.isFirstMove = false;
             _piece.isFirstRecentlyTaken = false;
          }
+
+         // update piece
+         this.board[rowFrom][columnFrom] = _piece;
+         _piece = this.getPiece(rowFrom, columnFrom);
+
+         console.log(`show board during movepiece 1`, _piece);
 
          let pieceToStash = this.getPiece(rowTo, columnTo);
 
@@ -293,19 +330,19 @@ export class Game {
       } else {
          game.turn = "white";
       }
-      let gameNew = _.clone(game);
-
+      let gameUpdated = _.clone(game);
+      console.log(`gameUpdated`, gameUpdated);
       // send updated game
       let message = {
          command: "updateboard",
          username: username,
-         values: { "0": JSON.stringify(gameNew) }
+         values: { "0": JSON.stringify(gameUpdated) }
       } as Message;
 
       socket?.emit("from-client", message);
 
       setGame((prevGame: any) => {
-         return gameNew;
+         return gameUpdated;
       });
    }
 

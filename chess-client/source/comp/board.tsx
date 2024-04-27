@@ -42,7 +42,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
    }, [inputSocket]);
 
    useEffect(() => {
-      console.log(`inputGame`, inputGame);
+      if (false) console.log(`inputGame`, inputGame);
 
       if (inputGame != null) {
          setGame(inputGame);
@@ -94,7 +94,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                {refPieceCurrentMoves.current != null && refPieceCurrentMoves.current?.length > 0 ? <>has moves!</> : <> </>}
             </div>
             <div className="col-1 pb-4">{colorMine}</div>
-            <div className="col-1 pb-4">{timerLabel}</div>
+            <div className="col-2 pb-4">{timerLabel}</div>
          </div>
          <div className="row" hidden={game == null}>
             <div className="col pb-4">
@@ -148,9 +148,11 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
             </div>
          </div>
          <div className="row">
+            <div className="col-12">{game?.winner != null && `${game.winner} is the winner`}</div>
             <div className="col-12">
                {game != null &&
                   game?.board?.length > 0 &&
+                  game?.winner == null &&
                   game?.board?.map((piecesAcrossRow, index) => {
                      let indexRowOriginal = index;
                      let locationRow = index * 2 + 1;
@@ -199,16 +201,17 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                     Move here...
                                  </button>
                               ) : null;
-
+                           // && colorMine == game.turn && pieceOccupant?.getColor() == game.turn
                            let display = (
                               <>
-                                 {isActualPiece && colorMine == game.turn && pieceOccupant?.getColor() == game.turn ? (
+                                 {isActualPiece ? (
                                     <button
                                        title={pieceOccupant?.getId()}
                                        onClick={() => {
                                           let canGetMoves = true;
                                           setPieceCurrent([indexRowOriginal, indexColOriginal]);
                                           let pieceOccupying = game.getPiece(indexRowOriginal, indexColOriginal);
+                                          console.log(`pieceOccupying`, pieceOccupying);
                                           let pieceSearchKing = game.findPiece("king", pieceOccupying?.getColor()!);
 
                                           let king = pieceSearchKing.piece;
@@ -225,6 +228,12 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                           if (isKingCheckmate) {
                                              alert(`King belonging to ${pieceOccupying?.getColor()} is in checkmate!`);
                                              canGetMoves = false;
+                                             game.setGameOver(
+                                                setGame,
+                                                game.getOtherPlayer(colorMine)?.color!,
+                                                inputUsername!,
+                                                socket
+                                             );
                                           }
 
                                           if (canGetMoves) {
