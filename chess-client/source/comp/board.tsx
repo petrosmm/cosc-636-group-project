@@ -7,6 +7,7 @@ import Enumerable from "linq";
 import { getMoves } from "../../../source/lib-moves";
 import { isKingInCheck, isKingInCheckmate } from "../../../source/lib-temp";
 import { Socket } from "socket.io-client";
+import { Timer } from "timer-node";
 
 const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUsername?: string }> = ({
    inputSocket,
@@ -18,6 +19,13 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
    const [pieceCurrent, setPieceCurrent, refPieceCurrent] = useStateRef(null as unknown as [number, number] | null);
    const [pieceCurrentMoves, setPieceCurrentMoves, refPieceCurrentMoves] = useStateRef([] as unknown as move[]);
    const [colorMine, setColorMine] = useState(null as unknown as color);
+   const [isTurnMine, setIsTurnMine] = useState(false);
+   const [timer, setTimer] = useState(
+      new Timer({
+         label: "test-timer"
+      })
+   );
+   const [timerLabel, setTimerLabel] = useState("");
 
    useEffect(() => {
       let doIgnore = false;
@@ -39,10 +47,40 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
       if (inputGame != null) {
          setGame(inputGame);
 
+         // current player...
          let player = inputGame.getPlayers().find((p) => p.username == inputUsername);
 
          if (player != undefined) {
-            setColorMine(player.color);
+            let color = player.color;
+
+            if (inputGame.turn == color) {
+               setIsTurnMine(true);
+               timer.start();
+
+               const interval = setInterval(() => {
+                  if (timer.isRunning()) {
+                     setTimerLabel(
+                        "running:" +
+                           " " +
+                           [
+                              timer.time().h.toString().padStart(2, "00"),
+                              timer.time().m.toString().padStart(2, "00"),
+                              timer.time().s.toString().padStart(2, "00")
+                           ].join(":")
+                     );
+                  } else {
+                     setTimerLabel(
+                        [
+                           timer.time().h.toString().padStart(2, "00"),
+                           timer.time().m.toString().padStart(2, "00"),
+                           timer.time().s.toString().padStart(2, "00")
+                        ].join(":")
+                     );
+                  }
+               }, 1000);
+            }
+
+            setColorMine(color);
          }
       }
    }, [inputGame]);
@@ -54,6 +92,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                {refPieceCurrentMoves.current != null && refPieceCurrentMoves.current?.length > 0 ? <>has moves!</> : <> </>}
             </div>
             <div className="col-1 pb-4">{colorMine}</div>
+            <div className="col-1 pb-4">{timerLabel}</div>
          </div>
          <div className="row" hidden={game == null}>
             <div className="col pb-4">
@@ -69,18 +108,18 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     game.movePiece(7, 2, 4, 3, setGame, inputUsername, socket);
-                     game.movePiece(7, 1, 4, 4, setGame, inputUsername, socket);
-                     game.movePiece(7, 5, 4, 5, setGame, inputUsername, socket);
-                     game.movePiece(7, 6, 4, 6, setGame, inputUsername, socket);
-                     game.movePiece(7, 4, 4, 2, setGame, inputUsername, socket);
+                     game.movePiece(7, 2, 4, 3, setGame, inputUsername, timer, socket);
+                     game.movePiece(7, 1, 4, 4, setGame, inputUsername, timer, socket);
+                     game.movePiece(7, 5, 4, 5, setGame, inputUsername, timer, socket);
+                     game.movePiece(7, 6, 4, 6, setGame, inputUsername, timer, socket);
+                     game.movePiece(7, 4, 4, 2, setGame, inputUsername, timer, socket);
 
-                     game.movePiece(0, 2, 5, 3, setGame, inputUsername, socket);
-                     game.movePiece(0, 1, 5, 4, setGame, inputUsername, socket);
+                     game.movePiece(0, 2, 5, 3, setGame, inputUsername, timer, socket);
+                     game.movePiece(0, 1, 5, 4, setGame, inputUsername, timer, socket);
 
-                     game.movePiece(0, 5, 5, 6, setGame, inputUsername, socket);
-                     game.movePiece(0, 6, 5, 5, setGame, inputUsername, socket);
-                     game.movePiece(0, 4, 5, 2, setGame, inputUsername, socket);
+                     game.movePiece(0, 5, 5, 6, setGame, inputUsername, timer, socket);
+                     game.movePiece(0, 6, 5, 5, setGame, inputUsername, timer, socket);
+                     game.movePiece(0, 4, 5, 2, setGame, inputUsername, timer, socket);
                   }}>
                   Test general
                </button>
@@ -89,8 +128,8 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputUsername, socket);
-                     game.movePiece(1, 6, 7, 1, setGame, inputUsername, socket);
+                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputUsername, timer, socket);
+                     game.movePiece(1, 6, 7, 1, setGame, inputUsername, timer, socket);
                   }}>
                   Test Pawn promotion
                </button>
@@ -99,8 +138,8 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                <button
                   className="btn btn-primary"
                   onClick={() => {
-                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputUsername, socket);
-                     game.movePiece(0, 4, 3, 3, setGame, inputUsername, socket);
+                     if (false) game.movePiece(6, 1, 0, 1, setGame, inputUsername, timer, socket);
+                     game.movePiece(0, 4, 3, 3, setGame, inputUsername, timer, socket);
                   }}>
                   Test Queen
                </button>
@@ -146,6 +185,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                              indexColOriginal,
                                              setGame,
                                              inputUsername,
+                                             timer,
                                              socket,
                                              move[2]
                                           );

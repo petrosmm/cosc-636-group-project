@@ -4,6 +4,7 @@ import { generateRandomNumber, generateRandomTextAndNumbers } from "./functions"
 import _ from "lodash";
 import * as Enumerable from "linq";
 import { fillBoardCheck, fillBoardCheckmate, fillBoardCheckmateAlt, fillBoardStandard } from "./lib-temp";
+import { Timer } from "timer-node";
 
 //const Enumerable = require("linq");
 
@@ -199,6 +200,7 @@ export class Game {
       columnTo: number,
       setGame: React.Dispatch<React.SetStateAction<Game>>,
       username: string | null | undefined,
+      timer: Timer,
       socket?: SocketClient,
       metaData?: move[2]
    ) {
@@ -270,10 +272,12 @@ export class Game {
                alert("pawn promoted!");
             }
 
+            timer.stop();
             this.updateBoard(setGame, this, username, socket);
             return;
          }
 
+         timer.stop();
          this.updateBoard(setGame, this, username, socket);
       }
    }
