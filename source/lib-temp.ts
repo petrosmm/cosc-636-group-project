@@ -14,7 +14,20 @@ export function isKingInCheck(kingRow: number, kingColumn: number, game: Game, c
             // Get moves for each piece type
             const moves = getMoves(row, col, game, false);
             // Check if any move can attack the king's position
-            if (moves.some(([destRow, destCol]) => destCol === kingColumn && destRow === kingRow)) {
+            if (
+               moves.some(([destRow, destCol]) => {
+                  let ifTrue = destCol === kingColumn && destRow === kingRow;
+                  if (false)
+                     if (ifTrue) {
+                        let pieceKing = game.getPiece(kingRow, kingColumn);
+                        let _piece = game.getPiece(destRow, destCol);
+                        console.log(`king:`, pieceKing, [kingRow, kingColumn]);
+                        console.log(`piece:`, _piece, [destRow, destCol]);
+                     }
+
+                  return ifTrue;
+               })
+            ) {
                return true; // King is in check if any move can capture the king
             }
          }

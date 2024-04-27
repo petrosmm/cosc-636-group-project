@@ -71,7 +71,7 @@ export function getMoves(row: number, col: number, game: Game, shouldShowDebug =
          }
       });
    } else {
-      console.log("no moves!");
+      if (shouldShowDebug) console.log("no moves!");
    }
 
    if (shouldShowDebug) console.log(`moves`, moves);

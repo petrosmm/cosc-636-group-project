@@ -208,7 +208,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                           setPieceCurrent([indexRowOriginal, indexColOriginal]);
                                           let pieceOccupying = game.getPiece(indexRowOriginal, indexColOriginal);
                                           let pieceSearchKing = game.findPiece(
-                                             pieceOccupying?.getType()!,
+                                             "king",
                                              pieceOccupying?.getColor()!
                                           );
 
