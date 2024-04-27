@@ -355,8 +355,8 @@ function getPawnMovesWithObstacles(row: number, column: number, game: Game, shou
       moves.push([newRow, column, null]);
 
       // double move
-      //  || piece?.hasDoneFirstMove()
-      if (row === startRow) {
+      //  || row === startRow
+      if (piece?.hasDoneFirstMove()) {
          if (false) console.log(row);
          if (false) console.log(`piece getPawnMovesWithObstacles`, piece);
 

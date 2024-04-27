@@ -201,10 +201,10 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                     Move here...
                                  </button>
                               ) : null;
-                           // && colorMine == game.turn && pieceOccupant?.getColor() == game.turn
+                           //
                            let display = (
                               <>
-                                 {isActualPiece ? (
+                                 {isActualPiece && colorMine == game.turn && pieceOccupant?.getColor() == game.turn ? (
                                     <button
                                        title={pieceOccupant?.getId()}
                                        onClick={() => {

@@ -127,7 +127,7 @@ export class Game {
                }
             });
          });
-         
+
          if (false!) console.log(`game.board`, game.board);
 
          game.boardInactive.forEach((col, index) => {
@@ -331,7 +331,9 @@ export class Game {
          game.turn = "white";
       }
       let gameUpdated = _.clone(game);
-      console.log(`gameUpdated`, gameUpdated);
+      
+      if (false) console.log(`gameUpdated`, gameUpdated);
+
       // send updated game
       let message = {
          command: "updateboard",

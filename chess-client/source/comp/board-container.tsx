@@ -122,8 +122,11 @@ const BoardContainer: React.FC<{
                   let _gameRaw = JSON.parse(values[0][1]) as Game;
                   const _gameNew = new Game("", "", _gameRaw);
 
-                  console.log(`_gameRaw`, _gameRaw);
-                  console.log(`_gameNew`, _gameNew);
+                  if (false) {
+                     console.log(`_gameRaw`, _gameRaw);
+                     console.log(`_gameNew`, _gameNew);
+                  }
+                  
                   if (_gameNew.board !== undefined) {
                      if (false) {
                         console.log(`received new game`);
