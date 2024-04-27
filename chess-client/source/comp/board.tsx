@@ -60,7 +60,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                const interval = setInterval(() => {
                   if (timer.isRunning()) {
                      setTimerLabel(
-                        "running:" +
+                        "current move:" +
                            " " +
                            [
                               timer.time().h.toString().padStart(2, "00"),
@@ -70,11 +70,13 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                      );
                   } else {
                      setTimerLabel(
-                        [
-                           timer.time().h.toString().padStart(2, "00"),
-                           timer.time().m.toString().padStart(2, "00"),
-                           timer.time().s.toString().padStart(2, "00")
-                        ].join(":")
+                        "last move:" +
+                           " " +
+                           [
+                              timer.time().h.toString().padStart(2, "00"),
+                              timer.time().m.toString().padStart(2, "00"),
+                              timer.time().s.toString().padStart(2, "00")
+                           ].join(":")
                      );
                   }
                }, 1000);
@@ -207,10 +209,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                           let canGetMoves = true;
                                           setPieceCurrent([indexRowOriginal, indexColOriginal]);
                                           let pieceOccupying = game.getPiece(indexRowOriginal, indexColOriginal);
-                                          let pieceSearchKing = game.findPiece(
-                                             "king",
-                                             pieceOccupying?.getColor()!
-                                          );
+                                          let pieceSearchKing = game.findPiece("king", pieceOccupying?.getColor()!);
 
                                           let king = pieceSearchKing.piece;
                                           let rowKing = pieceSearchKing.row;
