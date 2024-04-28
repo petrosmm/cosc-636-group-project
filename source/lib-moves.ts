@@ -118,11 +118,10 @@ function getRookMovesWithObstacles(row: number, column: number, game: Game, shou
             continue;
          } else {
             if (col == colHomeKing) {
-               console.log("yes");
                let pieceKing = game.getPiece(rowHome, col);
                if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
                   moves.push([rowHome, col, "castling"]);
-                  alert("castling available for " + piece?.getColor() + "!");
+                  if (shouldShowDebug) alert("castling available for " + piece?.getColor() + "!");
                }
             }
 
@@ -131,6 +130,7 @@ function getRookMovesWithObstacles(row: number, column: number, game: Game, shou
       }
    }
 
+   // castling white
    if (row == rowHome && column == 7 && piece?.isFirstMove) {
       for (let col = column - 1; col >= colHomeKing; col--) {
          if (game.board[rowHome][col] == null) {
@@ -140,7 +140,7 @@ function getRookMovesWithObstacles(row: number, column: number, game: Game, shou
                let pieceKing = game.getPiece(rowHome, col);
                if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
                   moves.push([rowHome, col, "castling"]);
-                  alert("castling available for " + piece?.getColor() + "!");
+                  if (shouldShowDebug) alert("castling available for " + piece?.getColor() + "!");
                }
             }
 

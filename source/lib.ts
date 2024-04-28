@@ -201,11 +201,21 @@ export class Game {
       }
    }
 
-   public swapPiece(row: number, column: number, row2: number, column2: number) {
+   public swapPiece(row: number, column: number, row2: number, column2: number, isException = false) {
       let pieceOriginal = this.getPiece(row, column);
       if (pieceOriginal != null) {
          let pieceSwap = this.getPiece(row2, column2);
-         if (pieceSwap != null) {
+         if (pieceSwap != null || isException) {
+            if (pieceSwap !== null) {
+               pieceSwap.isFirstMove = false;
+               pieceSwap.isFirstRecentlyTaken = false;
+            }
+
+            if (pieceOriginal != null) {
+               pieceOriginal.isFirstMove = false;
+               pieceOriginal.isFirstRecentlyTaken = false;
+            }
+
             this.board[row][column] = pieceSwap;
             this.board[row2][column2] = pieceOriginal;
          }
@@ -278,6 +288,12 @@ export class Game {
 
          if (metaData == "castling") {
             this.swapPiece(rowFrom, columnFrom, rowTo, columnTo);
+            if (columnFrom == 0) {
+               this.swapPiece(rowFrom, 0, rowFrom, 2, true);
+            } else if (columnFrom == 7) {
+               this.swapPiece(rowFrom, 7, rowFrom, 6, true);
+               this.swapPiece(rowFrom, 3, rowFrom, 5, true);
+            }
          } else {
             // DEFAULT BEHAVIOUR
             this.board[rowTo][columnTo] = _piece;
@@ -330,8 +346,9 @@ export class Game {
       } else {
          game.turn = "white";
       }
+
       let gameUpdated = _.clone(game);
-      
+
       if (false) console.log(`gameUpdated`, gameUpdated);
 
       // send updated game
