@@ -159,8 +159,15 @@ wssServer.on("connection", (connection) => {
                   })
                   .distinct();
 
+               let clientsInGames = Enumerable.from(games)
+                  .selectMany((p) => p.getPlayers())
+                  .select((p) => p.username)
+                  .toArray();
+
                _clientsAsAvailablePlayers.forEach((p, index) => {
-                  values[index.toString()] = p!;
+                  if (!clientsInGames.includes(p!)) {
+                     values[index.toString()] = p!;
+                  }
                });
 
                let message = {
