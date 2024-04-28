@@ -237,7 +237,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                                           }
 
                                           if (canGetMoves) {
-                                             let moves = getMoves(indexRowOriginal, indexColOriginal, game);
+                                             let moves = getMoves(indexRowOriginal, indexColOriginal, game, true, isKingCheck);
                                              if (moves?.length > 0) {
                                                 setPieceCurrentMoves(moves);
                                              } else {

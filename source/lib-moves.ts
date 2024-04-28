@@ -1,7 +1,7 @@
 import { Piece, move, Game } from "./lib";
 const Enumerable = require("linq");
 
-export function getMoves(row: number, col: number, game: Game, shouldShowDebug = true) {
+export function getMoves(row: number, col: number, game: Game, shouldShowDebug = true, isKingCheckAFactor = false) {
    let _moves: move[] = [];
    let moves: move[] = [];
    let pieceOccupying = game.getPiece(row, col);
@@ -16,7 +16,7 @@ export function getMoves(row: number, col: number, game: Game, shouldShowDebug =
             }
 
             case "rook": {
-               _moves = getRookMovesWithObstacles(row, col, game, shouldShowDebug);
+               _moves = getRookMovesWithObstacles(row, col, game, shouldShowDebug, isKingCheckAFactor);
 
                break;
             }
@@ -79,7 +79,13 @@ export function getMoves(row: number, col: number, game: Game, shouldShowDebug =
    return moves;
 }
 
-function getRookMovesWithObstacles(row: number, column: number, game: Game, shouldShowDebug: boolean): Array<move> {
+function getRookMovesWithObstacles(
+   row: number,
+   column: number,
+   game: Game,
+   shouldShowDebug: boolean,
+   isKingCheckAFactor: boolean
+): Array<move> {
    let piece = game.getPiece(row, column);
    let isBlack = piece?.getColor() == "black";
    const rowHome = isBlack ? 0 : 7;
@@ -112,39 +118,42 @@ function getRookMovesWithObstacles(row: number, column: number, game: Game, shou
       }
    }
 
-   if (row == rowHome && column == 0 && piece?.isFirstMove) {
-      for (let col = 1; col <= colHomeKing; col++) {
-         if (game.board[rowHome][col] == null) {
-            continue;
-         } else {
-            if (col == colHomeKing) {
-               let pieceKing = game.getPiece(rowHome, col);
-               if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
-                  moves.push([rowHome, col, "castling"]);
-                  if (shouldShowDebug) alert("castling available for " + piece?.getColor() + "!");
+   // cannot check while king is in check
+   if (!isKingCheckAFactor) {
+      if (row == rowHome && column == 0 && piece?.isFirstMove) {
+         for (let col = 1; col <= colHomeKing; col++) {
+            if (game.board[rowHome][col] == null) {
+               continue;
+            } else {
+               if (col == colHomeKing) {
+                  let pieceKing = game.getPiece(rowHome, col);
+                  if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
+                     moves.push([rowHome, col, "castling"]);
+                     if (shouldShowDebug) alert("castling available for " + piece?.getColor() + "!");
+                  }
                }
-            }
 
-            break;
+               break;
+            }
          }
       }
-   }
 
-   // castling white
-   if (row == rowHome && column == 7 && piece?.isFirstMove) {
-      for (let col = column - 1; col >= colHomeKing; col--) {
-         if (game.board[rowHome][col] == null) {
-            continue;
-         } else {
-            if (col == colHomeKing) {
-               let pieceKing = game.getPiece(rowHome, col);
-               if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
-                  moves.push([rowHome, col, "castling"]);
-                  if (shouldShowDebug) alert("castling available for " + piece?.getColor() + "!");
+      // castling white
+      if (row == rowHome && column == 7 && piece?.isFirstMove) {
+         for (let col = column - 1; col >= colHomeKing; col--) {
+            if (game.board[rowHome][col] == null) {
+               continue;
+            } else {
+               if (col == colHomeKing) {
+                  let pieceKing = game.getPiece(rowHome, col);
+                  if (pieceKing != null && pieceKing.isFirstMove && piece.getColor() == pieceKing.getColor()) {
+                     moves.push([rowHome, col, "castling"]);
+                     if (shouldShowDebug) alert("castling available for " + piece?.getColor() + "!");
+                  }
                }
-            }
 
-            break;
+               break;
+            }
          }
       }
    }
