@@ -126,7 +126,7 @@ const BoardContainer: React.FC<{
                      console.log(`_gameRaw`, _gameRaw);
                      console.log(`_gameNew`, _gameNew);
                   }
-                  
+
                   if (_gameNew.board !== undefined) {
                      if (false) {
                         console.log(`received new game`);
@@ -195,19 +195,6 @@ const BoardContainer: React.FC<{
                   Get Players...
                </button>
             </div>
-            <div className="col-1" hidden={!isConnected}>
-               <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                     console.log(`user from test before sending`, refUser.current);
-                     socket.emit("from-client", {
-                        command: "test",
-                        username: username
-                     } as Message);
-                  }}>
-                  test
-               </button>
-            </div>
             <div className="col-1" hidden={isConnected}>
                <button
                   className="btn btn-primary"
@@ -215,15 +202,6 @@ const BoardContainer: React.FC<{
                      socket.connect();
                   }}>
                   connect
-               </button>
-            </div>
-            <div className="col-1">
-               <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                     console.log(socket);
-                  }}>
-                  check socket
                </button>
             </div>
             {false && username?.length > 0 && (

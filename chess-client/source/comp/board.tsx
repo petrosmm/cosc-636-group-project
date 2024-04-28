@@ -133,7 +133,7 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
                      if (false) game.movePiece(6, 1, 0, 1, setGame, inputUsername, timer, socket);
                      game.movePiece(1, 6, 7, 1, setGame, inputUsername, timer, socket);
                   }}>
-                  Test Pawn promotion
+                  Test PP
                </button>
             </div>
             <div className="col pb-4">
