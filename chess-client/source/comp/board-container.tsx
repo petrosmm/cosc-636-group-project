@@ -67,6 +67,8 @@ const BoardContainer: React.FC<{
                            .toArray();
 
                         setPlayers(players);
+                     } else {
+                        setPlayers([]);
                      }
                   }
 

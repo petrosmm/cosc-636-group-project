@@ -95,6 +95,9 @@ const Board: React.FC<{ inputSocket: Socket<any, any>; inputGame?: Game; inputUs
             </div>
             <div className="col-1 pb-4">{colorMine}</div>
             <div className="col-2 pb-4">{timerLabel}</div>
+            <div className="col-2 pb-4">
+               {inputUsername && inputUsername?.length > 0 ? ["username:", inputUsername].join(" ") : null}
+            </div>
          </div>
          <div className="row" hidden={game == null}>
             <div className="col pb-4">
