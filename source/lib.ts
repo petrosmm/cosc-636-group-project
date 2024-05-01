@@ -289,7 +289,8 @@ export class Game {
          if (metaData == "castling") {
             this.swapPiece(rowFrom, columnFrom, rowTo, columnTo);
             if (columnFrom == 0) {
-               this.swapPiece(rowFrom, 0, rowFrom, 2, true);
+               this.swapPiece(rowFrom, 0, rowFrom, 1, true);
+               this.swapPiece(rowFrom, 3, rowFrom, 2, true);
             } else if (columnFrom == 7) {
                this.swapPiece(rowFrom, 7, rowFrom, 6, true);
                this.swapPiece(rowFrom, 3, rowFrom, 5, true);
